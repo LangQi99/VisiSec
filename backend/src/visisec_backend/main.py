@@ -5,6 +5,7 @@ VisiSec Backend - Multimodal Meeting Analysis API
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from typing import Dict, Any, List
 import logging
 import os
@@ -14,6 +15,7 @@ import asyncio
 from functools import wraps
 from dotenv import load_dotenv
 from datetime import datetime
+import uuid
 
 # Load environment variables
 load_dotenv()
@@ -62,8 +64,18 @@ app = Flask(__name__)
 allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:8080').split(',')
 CORS(app, origins=allowed_origins)
 
+# Initialize SocketIO for WebSocket support
+socketio = SocketIO(
+    app,
+    cors_allowed_origins=allowed_origins,
+    async_mode='threading',
+    logger=True,
+    engineio_logger=True
+)
+
 # Store for meeting data (in production, use a database)
 meetings_db = {}
+active_sessions = {}  # Track active WebSocket sessions
 
 # Configuration constants
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 100 * 1024 * 1024))  # 100MB default
@@ -485,16 +497,256 @@ async def test_llm():
         }), 500
 
 
+# ============================================================================
+# WebSocket Event Handlers
+# ============================================================================
+
+@socketio.on('connect')
+def handle_connect():
+    """处理WebSocket连接"""
+    logger.info("="*60)
+    logger.info("🔌 WebSocket client connected")
+    logger.info(f"   Session ID: {request.sid}")
+    logger.info("="*60)
+    
+    emit('connected', {
+        'status': 'connected',
+        'session_id': request.sid,
+        'timestamp': datetime.now().isoformat()
+    })
+
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    """处理WebSocket断开"""
+    logger.info("="*60)
+    logger.info("🔌 WebSocket client disconnected")
+    logger.info(f"   Session ID: {request.sid}")
+    
+    # 清理活动会话
+    if request.sid in active_sessions:
+        session_data = active_sessions.pop(request.sid)
+        logger.info(f"   Cleaned up session: {session_data.get('recording_id')}")
+    
+    logger.info("="*60)
+
+
+@socketio.on('session_start')
+def handle_session_start(data):
+    """处理会话开始"""
+    try:
+        logger.info("="*60)
+        logger.info("🚀 Session start request received")
+        logger.info(f"   Client SID: {request.sid}")
+        logger.info(f"   Meeting Title: {data.get('meetingTitle', 'Untitled')}")
+        
+        # 生成会话和录制ID
+        session_id = request.sid
+        recording_id = str(uuid.uuid4())
+        
+        # 保存会话数据
+        active_sessions[session_id] = {
+            'recording_id': recording_id,
+            'meeting_title': data.get('meetingTitle', 'Untitled Meeting'),
+            'start_time': datetime.now().isoformat(),
+            'sensor_data': [],
+            'keyframes': []
+        }
+        
+        # 将客户端加入房间
+        join_room(recording_id)
+        
+        logger.info(f"✅ Session started successfully")
+        logger.info(f"   Recording ID: {recording_id}")
+        logger.info("="*60)
+        
+        # 发送会话开始确认
+        emit('session_started', {
+            'sessionId': session_id,
+            'recordingId': recording_id,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error starting session: {str(e)}", exc_info=True)
+        emit('error', {
+            'message': 'Failed to start session',
+            'error': str(e)
+        })
+
+
+@socketio.on('sensor_data')
+def handle_sensor_data(data):
+    """处理传感器数据"""
+    try:
+        session_id = data.get('sessionId')
+        
+        if session_id not in active_sessions:
+            logger.warning(f"⚠️ Sensor data received for inactive session: {session_id}")
+            emit('error', {'message': 'Invalid session'})
+            return
+        
+        # 限制内存使用：最多保存1000个数据点
+        MAX_DATA_POINTS = 1000
+        session_data = active_sessions[session_id]['sensor_data']
+        
+        # 保存传感器数据
+        session_data.append({
+            'timestamp': datetime.now().isoformat(),
+            'data': data
+        })
+        
+        # 如果超过限制，删除最旧的数据
+        if len(session_data) > MAX_DATA_POINTS:
+            removed = session_data.pop(0)
+            logger.debug(f"📦 Removed oldest sensor data point to maintain memory limit")
+        
+        logger.debug(f"📊 Sensor data received for session {session_id} (total: {len(session_data)})")
+        
+        # 发送处理确认
+        emit('sensor_data_received', {
+            'status': 'received',
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error handling sensor data: {str(e)}", exc_info=True)
+        emit('error', {
+            'message': 'Failed to process sensor data',
+            'error': str(e)
+        })
+
+
+@socketio.on('keyframe')
+def handle_keyframe(data):
+    """处理关键帧"""
+    try:
+        session_id = data.get('sessionId')
+        recording_id = data.get('recordingId')
+        
+        if session_id not in active_sessions:
+            logger.warning(f"⚠️ Keyframe received for inactive session: {session_id}")
+            emit('error', {'message': 'Invalid session'})
+            return
+        
+        logger.info("="*60)
+        logger.info("🖼️ Keyframe received")
+        logger.info(f"   Session: {session_id}")
+        logger.info(f"   Recording: {recording_id}")
+        
+        # 限制内存使用：最多保存100个关键帧
+        MAX_KEYFRAMES = 100
+        keyframes = active_sessions[session_id]['keyframes']
+        
+        # 保存关键帧
+        keyframe_data = {
+            'timestamp': datetime.now().isoformat(),
+            'source': data.get('source', 'REAR'),
+            'change_detected': data.get('sceneChange', {}).get('changed', False),
+            'attention_score': data.get('attention', {}).get('score', 0)
+        }
+        
+        keyframes.append(keyframe_data)
+        
+        # 如果超过限制，删除最旧的关键帧
+        if len(keyframes) > MAX_KEYFRAMES:
+            removed = keyframes.pop(0)
+            logger.debug(f"📦 Removed oldest keyframe to maintain memory limit")
+        
+        logger.info(f"✅ Keyframe saved (total: {len(keyframes)})")
+        logger.info("="*60)
+        
+        # 发送处理确认
+        emit('keyframe_received', {
+            'status': 'received',
+            'keyframe_count': len(keyframes),
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error handling keyframe: {str(e)}", exc_info=True)
+        emit('error', {
+            'message': 'Failed to process keyframe',
+            'error': str(e)
+        })
+
+
+@socketio.on('session_end')
+def handle_session_end(data):
+    """处理会话结束"""
+    try:
+        session_id = data.get('sessionId')
+        recording_id = data.get('recordingId')
+        
+        if session_id not in active_sessions:
+            logger.warning(f"⚠️ Session end for inactive session: {session_id}")
+            emit('error', {'message': 'Invalid session'})
+            return
+        
+        logger.info("="*60)
+        logger.info("🛑 Session end request received")
+        logger.info(f"   Session: {session_id}")
+        logger.info(f"   Recording: {recording_id}")
+        
+        # 获取会话数据
+        session_data = active_sessions[session_id]
+        
+        # 保存到数据库（这里保存到内存中的meetings_db）
+        meetings_db[recording_id] = {
+            'recording_id': recording_id,
+            'meeting_title': session_data['meeting_title'],
+            'start_time': session_data['start_time'],
+            'end_time': datetime.now().isoformat(),
+            'sensor_data_count': len(session_data['sensor_data']),
+            'keyframe_count': len(session_data['keyframes']),
+            'status': 'completed'
+        }
+        
+        logger.info(f"✅ Session data saved to database")
+        logger.info(f"   Sensor data points: {len(session_data['sensor_data'])}")
+        logger.info(f"   Keyframes: {len(session_data['keyframes'])}")
+        
+        # 离开房间
+        leave_room(recording_id)
+        
+        # 清理活动会话
+        active_sessions.pop(session_id)
+        
+        logger.info("="*60)
+        
+        # 发送会话结束确认
+        emit('session_ended', {
+            'status': 'completed',
+            'recordingId': recording_id,
+            'summary': {
+                'sensor_data_count': meetings_db[recording_id]['sensor_data_count'],
+                'keyframe_count': meetings_db[recording_id]['keyframe_count'],
+                'duration': 'calculated_duration'
+            },
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error ending session: {str(e)}", exc_info=True)
+        emit('error', {
+            'message': 'Failed to end session',
+            'error': str(e)
+        })
+
+
 if __name__ == "__main__":
     logger.info("="*80)
-    logger.info("🚀 Starting Flask server...")
+    logger.info("🚀 Starting Flask server with WebSocket support...")
     logger.info(f"   Host: {FLASK_HOST}")
     logger.info(f"   Port: {FLASK_PORT}")
     logger.info(f"   Debug: {FLASK_DEBUG}")
     logger.info("="*80)
     
-    app.run(
+    # Use socketio.run instead of app.run for WebSocket support
+    socketio.run(
+        app,
         host=FLASK_HOST,
         port=FLASK_PORT,
-        debug=FLASK_DEBUG
+        debug=FLASK_DEBUG,
+        allow_unsafe_werkzeug=True  # For development only
     )

@@ -10,10 +10,14 @@
     "build:android": "vite build && npx cap sync android && npx cap open android"
   },
   "dependencies": {
-    "@capacitor/android": "^8.0.2",
-    "@capacitor/camera": "^8.0.0",
-    "@capacitor/cli": "^7.4.5",
-    "@capacitor/core": "^8.0.2",
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/camera": "^6.0.2",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/device": "^6.0.1",
+    "@capacitor/motion": "^6.0.1",
+    "@capacitor/filesystem": "^6.0.1",
+    "@tensorflow/tfjs": "^4.17.0",
     "vue": "^3.5.24",
     "vue-router": "^5.0.0"
   },
