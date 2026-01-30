@@ -9,7 +9,10 @@
  * 
  * 权限说明：
  * - iOS: 需要通过DeviceMotionEvent.requestPermission()请求运动传感器权限
- * - Android: 传感器默认可用，无需显式权限请求（Android 10+需要ACTIVITY_RECOGNITION权限）
+ * - Android: 基础加速度计和陀螺仪默认可用
+ *   - 高级功能（高采样率）需要ACTIVITY_RECOGNITION权限（Android 10+）
+ *   - ACTIVITY_RECOGNITION是危险权限，需要在原生代码中请求
+ *   - 当前实现使用Capacitor默认行为，适用于大多数用例
  */
 
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
@@ -18,14 +21,16 @@ import { Device } from '@capacitor/device'
 
 // 日志辅助函数 - 增强版，包含时间戳和更详细的错误信息
 const log = (emoji, message, data = null) => {
-  const timestamp = new Date().toISOString().split('T')[1].slice(0, -1)
+  const timestamp = new Date().toISOString().substring(11, 23)
   console.log(`${emoji} [${timestamp}] [Sensors] ${message}`)
   if (data) {
     if (data instanceof Error) {
       console.log('   ❌ Error:', data.message)
       console.log('   📍 Stack:', data.stack)
     } else {
-      console.log('   📊 Data:', JSON.stringify(data, null, 2))
+      // 在开发环境中格式化输出，生产环境简化
+      const isDev = import.meta.env.DEV
+      console.log('   📊 Data:', isDev ? JSON.stringify(data, null, 2) : data)
     }
   }
 }
@@ -70,15 +75,14 @@ class IMUSensorManager {
       // 检测平台
       await this.detectPlatform()
       
-      // 请求传感器权限（仅iOS需要，通过Web API）
-      // Android不需要显式权限请求，传感器默认可用
+      // 请求传感器权限（平台相关）
       if (typeof DeviceMotionEvent !== 'undefined' && 
           typeof DeviceMotionEvent.requestPermission === 'function') {
         // iOS 13+ Safari需要请求权限
-        log('📱', 'Detected iOS - requesting motion permission...')
+        log('📱', 'Detected iOS - requesting motion permission via DeviceMotionEvent...')
         try {
           const permissionState = await DeviceMotionEvent.requestPermission()
-          log('✅', 'Motion permission state:', permissionState)
+          log('✅', 'Motion permission state:', { state: permissionState })
           
           if (permissionState !== 'granted') {
             throw new Error(`Motion permission denied: ${permissionState}`)
@@ -87,9 +91,16 @@ class IMUSensorManager {
           log('❌', 'Failed to request iOS motion permission', error)
           throw error
         }
+      } else if (this.platform === 'android') {
+        // Android: 基础传感器（加速度计、陀螺仪）默认可用
+        // 注意：Android 10+ (API 29+) 如果需要高采样率或某些特定传感器功能，
+        // 可能需要ACTIVITY_RECOGNITION权限，但这需要在原生Android代码中请求
+        // 这里我们依赖Capacitor的默认行为
+        log('✅', 'Android platform - motion sensors available (basic access)')
+        log('ℹ️', 'Note: ACTIVITY_RECOGNITION permission in AndroidManifest.xml required for Android 10+')
       } else {
-        // Android或不需要权限的浏览器
-        log('✅', `Motion sensors available on ${this.platform} (no permission required)`)
+        // Web或其他平台 - 传感器通过Web API可用
+        log('✅', `Motion sensors available on ${this.platform} via Web API`)
       }
 
       // 监听加速度计和陀螺仪数据

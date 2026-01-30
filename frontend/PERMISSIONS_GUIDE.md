@@ -4,6 +4,15 @@
 
 VisiSec 是一个多模态会议助理应用，需要访问多种设备传感器和硬件功能。本文档详细说明了各项权限的用途和配置方法。
 
+## 技术要求
+
+### Android 构建要求
+- **最低SDK**: API 22 (Android 5.1)
+- **目标SDK**: API 34 (Android 14)
+- **Java版本**: Java 17 (由 Capacitor 6 自动配置)
+  - Capacitor 6 要求 Java 17 作为编译版本
+  - 自动生成的 `capacitor.build.gradle` 文件设置此要求
+
 ## 所需权限列表
 
 ### 1. 运动传感器 (Motion Sensors)
@@ -16,13 +25,21 @@ VisiSec 是一个多模态会议助理应用，需要访问多种设备传感器
 - **Info.plist**: 不需要额外配置（iOS 13+ Safari 会自动弹出权限对话框）
 
 #### Android 配置
-- **权限**: `android.permission.ACTIVITY_RECOGNITION` (Android 10+)
-- **权限**: `android.permission.HIGH_SAMPLING_RATE_SENSORS`
+- **基础权限**: 加速度计和陀螺仪默认可用，无需运行时权限请求
+- **高级权限** (Android 10+, API 29+): 
+  - `android.permission.ACTIVITY_RECOGNITION` - **需要运行时请求**
+  - 用于访问某些高级传感器功能和高采样率数据
+  - **注意**: 这是危险权限，需要在应用运行时请求用户授权
+- **可选权限**: `android.permission.HIGH_SAMPLING_RATE_SENSORS` (Android 12+)
 - **特性声明**: 
   - `android.hardware.sensor.accelerometer` (非必需)
   - `android.hardware.sensor.gyroscope` (非必需)
-- **触发时机**: 自动可用，无需显式请求
 - **配置位置**: `android/app/src/main/AndroidManifest.xml`
+
+**重要提示**: 
+- 基础的加速度计和陀螺仪功能在Android上默认可用
+- 如果需要高采样率或特定传感器功能，需要在原生Android代码中请求ACTIVITY_RECOGNITION权限
+- 当前实现使用Capacitor Motion插件的默认行为，适用于大多数用例
 
 ### 2. 相机 (Camera)
 
@@ -102,8 +119,9 @@ VisiSec 是一个多模态会议助理应用，需要访问多种设备传感器
    - 需要用户批准才能继续
    
 2. **IMU 传感器** (Android):
-   - 自动开始收集数据
-   - 无需用户交互
+   - 基础加速度计和陀螺仪数据自动可用
+   - 如果应用需要高级传感器功能，ACTIVITY_RECOGNITION权限需要在原生代码中请求
+   - 对于大多数用例，无需用户交互即可开始收集数据
 
 3. **相机**:
    - Capacitor Camera 插件自动请求权限
@@ -153,7 +171,10 @@ adb shell dumpsys package com.visisec.app | grep permission
 ## 常见问题
 
 ### Q1: Android 上出现 "Motion.requestPermission() is not implemented"
-**A**: 这是正常的！Android 不需要通过 Motion 插件请求权限。传感器数据会自动可用。这个错误已在最新版本中修复。
+**A**: 这个错误已在最新版本中修复！问题原因是 Capacitor Motion 插件不提供 `requestPermission()` 方法。修复后的代码使用正确的方式：
+- **iOS**: 使用 `DeviceMotionEvent.requestPermission()` 请求权限
+- **Android**: 基础传感器默认可用，无需调用请求方法
+- **说明**: 虽然AndroidManifest.xml中声明了ACTIVITY_RECOGNITION权限，但基础的加速度计和陀螺仪访问不需要运行时权限请求
 
 ### Q2: iOS 上点击"开始录制"没有弹出权限对话框
 **A**: 确保你的应用运行在用户触发的事件中（如按钮点击）。iOS Safari 要求权限请求必须在用户交互的上下文中进行。
