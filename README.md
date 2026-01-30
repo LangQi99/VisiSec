@@ -220,6 +220,18 @@ Or use the convenience script:
 npm run build:android
 ```
 
+### ⚠️ 权限配置重要提示 / Permission Configuration
+
+VisiSec 需要访问多种设备传感器和硬件。**请仔细阅读** [权限配置指南](frontend/PERMISSIONS_GUIDE.md) 了解：
+
+- 📱 运动传感器权限配置 (Android/iOS)
+- 📷 相机权限配置
+- 🎤 麦克风权限配置
+- 💾 存储权限配置
+- 🐛 常见权限问题解决方案
+
+**重要**: 如果您遇到 "Motion.requestPermission() is not implemented on android" 错误，这是正常的！Android 不需要显式请求运动传感器权限。详见权限配置指南。
+
 ---
 
 ## 📂 Project Structure
@@ -274,19 +286,32 @@ Terracotta:       #C85A3E    /* Warm accent */
 
 ## 🗺️ Roadmap
 
+### ✅ Completed
 - [x] Core project structure
-- [x] Frontend UI components
-- [x] Backend API skeleton
+- [x] Frontend UI components (Vue 3 + Capacitor)
+- [x] Backend API implementation (Flask + WebSocket)
 - [x] Capacitor Android integration
-- [ ] Real audio recording implementation
-- [ ] Camera stream integration
-- [ ] IMU sensor data collection
-- [ ] OpenCV keyframe extraction
-- [ ] Whisper integration for transcription
-- [ ] LLM-powered summarization
-- [ ] Calendar API integration
+- [x] IMU sensor data collection with platform-specific permission handling
+- [x] Camera integration (dual camera support)
+- [x] Audio recording implementation
+- [x] Edge computing with TensorFlow.js
+- [x] Scene change detection
+- [x] Attention scoring
+- [x] WebSocket real-time communication
+- [x] LLM integration (DeepSeek V3)
+- [x] Meeting summary generation
+- [x] Comprehensive permission configuration
+
+### 🚧 In Progress
+- [ ] Real OCR implementation (currently placeholder)
+- [ ] Whisper API integration for accurate transcription
+- [ ] Calendar API integration for action items
+
+### 🔮 Future Enhancements
 - [ ] iOS support
 - [ ] Real-time collaboration features
+- [ ] Multi-language support
+- [ ] Offline mode with local LLM
 
 ---
 
