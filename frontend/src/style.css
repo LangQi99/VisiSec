@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
 
 @import "tailwindcss";
 
@@ -7,8 +8,8 @@
   --color-ink: #1A1A1A;
   --color-terracotta: #C85A3E;
   
-  --font-family-serif: Merriweather, Georgia, serif;
-  --font-family-sans: Inter, Helvetica, Arial, sans-serif;
+  --font-family-serif: "Noto Serif SC", Merriweather, Georgia, serif;
+  --font-family-sans: "Noto Sans SC", Inter, Helvetica, Arial, sans-serif;
   
   --radius-4xl: 2rem;
 }

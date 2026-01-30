@@ -1,88 +1,220 @@
 """
 VisiSec Backend - Multimodal Meeting Analysis API
+使用 Flask + Silicon Flow DeepSeek LLM
 """
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Dict, Any
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from typing import Dict, Any, List
 import logging
+import os
+import httpx
+import json
+from dotenv import load_dotenv
+from datetime import datetime
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Load environment variables
+load_dotenv()
+
+# Configure comprehensive logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('visisec_backend.log')
+    ]
+)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(
-    title="VisiSec Backend API",
-    description="Multimodal meeting assistant backend for audio/video processing",
-    version="0.1.0"
-)
+# Log configuration loading
+logger.info("="*80)
+logger.info("VisiSec Backend Starting...")
+logger.info("="*80)
 
-# CORS middleware for frontend communication
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict to specific origins
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Get configuration from environment
+SILICON_FLOW_API_KEY = os.getenv('SILICON_FLOW_API_KEY', '')
+SILICON_FLOW_MODEL = os.getenv('SILICON_FLOW_MODEL', 'deepseek-ai/DeepSeek-V3')
+SILICON_FLOW_API_URL = os.getenv('SILICON_FLOW_API_URL', 'https://api.siliconflow.cn/v1/chat/completions')
+FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
+FLASK_PORT = int(os.getenv('FLASK_PORT', '5124'))
+FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
 
-@app.get("/")
-async def root():
-    """Health check endpoint"""
-    return {
+# Log critical configuration
+logger.info(f"Silicon Flow API URL: {SILICON_FLOW_API_URL}")
+logger.info(f"Silicon Flow Model: {SILICON_FLOW_MODEL}")
+logger.info(f"API Key configured: {'Yes' if SILICON_FLOW_API_KEY else 'No (WARNING!)'}")
+logger.info(f"Flask Host: {FLASK_HOST}")
+logger.info(f"Flask Port: {FLASK_PORT}")
+logger.info(f"Flask Debug Mode: {FLASK_DEBUG}")
+logger.info("="*80)
+
+if not SILICON_FLOW_API_KEY:
+    logger.warning("⚠️  WARNING: SILICON_FLOW_API_KEY is not set! LLM功能将不可用!")
+    logger.warning("⚠️  Please set it in .env file")
+
+app = Flask(__name__)
+CORS(app)  # Enable CORS for frontend communication
+
+# Store for meeting data (in production, use a database)
+meetings_db = {}
+
+async def call_llm(messages: List[Dict[str, str]], temperature: float = 0.7) -> str:
+    """
+    调用 Silicon Flow DeepSeek LLM API
+    """
+    logger.info(f"🤖 Calling LLM API: {SILICON_FLOW_API_URL}")
+    logger.debug(f"Messages: {json.dumps(messages, ensure_ascii=False, indent=2)}")
+    
+    if not SILICON_FLOW_API_KEY:
+        logger.error("❌ SILICON_FLOW_API_KEY is not configured!")
+        raise ValueError("LLM API Key未配置")
+    
+    headers = {
+        "Authorization": f"Bearer {SILICON_FLOW_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "model": SILICON_FLOW_MODEL,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": 2000
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            logger.info(f"📤 Sending request to {SILICON_FLOW_API_URL}")
+            response = await client.post(
+                SILICON_FLOW_API_URL,
+                headers=headers,
+                json=payload
+            )
+            
+            logger.info(f"📥 Response status: {response.status_code}")
+            
+            if response.status_code != 200:
+                logger.error(f"❌ LLM API error: {response.status_code}")
+                logger.error(f"Response: {response.text}")
+                raise Exception(f"LLM API returned {response.status_code}: {response.text}")
+            
+            result = response.json()
+            logger.debug(f"LLM Response: {json.dumps(result, ensure_ascii=False, indent=2)}")
+            
+            content = result['choices'][0]['message']['content']
+            logger.info(f"✅ LLM response received: {len(content)} characters")
+            
+            return content
+    
+    except httpx.TimeoutException:
+        logger.error("❌ LLM API request timeout")
+        raise Exception("LLM API请求超时")
+    except Exception as e:
+        logger.error(f"❌ LLM API call failed: {str(e)}")
+        raise
+
+
+@app.route('/')
+def root():
+    """健康检查端点"""
+    logger.info("Health check requested")
+    return jsonify({
         "status": "healthy",
         "service": "VisiSec Backend",
-        "version": "0.1.0"
-    }
+        "version": "0.2.0",
+        "llm_configured": bool(SILICON_FLOW_API_KEY),
+        "timestamp": datetime.now().isoformat()
+    })
 
-@app.post("/api/v1/upload/audio")
-async def upload_audio(file: UploadFile = File(...)):
+
+@app.route('/api/v1/upload/audio', methods=['POST'])
+def upload_audio():
     """
-    Upload audio file for transcription and analysis
+    上传音频文件进行转录和分析
     """
     try:
+        logger.info("="*60)
+        logger.info("📤 Audio upload request received")
+        
+        if 'file' not in request.files:
+            logger.warning("❌ No file in request")
+            return jsonify({"error": "No file provided"}), 400
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            logger.warning("❌ Empty filename")
+            return jsonify({"error": "Empty filename"}), 400
+        
         # Validate file type
-        if not file.content_type.startswith('audio/'):
-            raise HTTPException(status_code=400, detail="Invalid file type. Must be audio.")
+        if not file.content_type or not file.content_type.startswith('audio/'):
+            logger.warning(f"❌ Invalid file type: {file.content_type}")
+            return jsonify({"error": "Invalid file type. Must be audio."}), 400
         
-        # Process audio (placeholder)
-        logger.info(f"Received audio file: {file.filename}")
+        logger.info(f"✅ Received audio file: {file.filename}")
+        logger.info(f"   Content-Type: {file.content_type}")
+        logger.info(f"   Size: {len(file.read())} bytes")
+        file.seek(0)  # Reset file pointer
         
-        return {
+        # In production: save file, process with Whisper, etc.
+        
+        return jsonify({
             "status": "success",
             "filename": file.filename,
-            "message": "Audio file received and queued for processing"
-        }
+            "message": "音频文件已接收并排队处理"
+        })
+    
     except Exception as e:
-        logger.error(f"Error uploading audio: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"❌ Error uploading audio: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
-@app.post("/api/v1/upload/video")
-async def upload_video(file: UploadFile = File(...)):
+
+@app.route('/api/v1/upload/video', methods=['POST'])
+def upload_video():
     """
-    Upload video file for frame extraction and analysis
+    上传视频文件进行帧提取和分析
     """
     try:
+        logger.info("="*60)
+        logger.info("📹 Video upload request received")
+        
+        if 'file' not in request.files:
+            logger.warning("❌ No file in request")
+            return jsonify({"error": "No file provided"}), 400
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            logger.warning("❌ Empty filename")
+            return jsonify({"error": "Empty filename"}), 400
+        
         # Validate file type
-        if not file.content_type.startswith('video/'):
-            raise HTTPException(status_code=400, detail="Invalid file type. Must be video.")
+        if not file.content_type or not file.content_type.startswith('video/'):
+            logger.warning(f"❌ Invalid file type: {file.content_type}")
+            return jsonify({"error": "Invalid file type. Must be video."}), 400
         
-        # Process video (placeholder)
-        logger.info(f"Received video file: {file.filename}")
+        logger.info(f"✅ Received video file: {file.filename}")
+        logger.info(f"   Content-Type: {file.content_type}")
+        logger.info(f"   Size: {len(file.read())} bytes")
+        file.seek(0)  # Reset file pointer
         
-        return {
+        # In production: save file, extract keyframes with OpenCV, etc.
+        
+        return jsonify({
             "status": "success",
             "filename": file.filename,
-            "message": "Video file received and queued for processing"
-        }
+            "message": "视频文件已接收并排队处理"
+        })
+    
     except Exception as e:
-        logger.error(f"Error uploading video: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"❌ Error uploading video: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
-@app.post("/api/v1/analyze/attention")
-async def analyze_attention(data: Dict[str, Any]):
+
+@app.route('/api/v1/analyze/attention', methods=['POST'])
+def analyze_attention():
     """
-    Analyze attention patterns from sensor data
+    分析传感器数据中的注意力模式
     
     Expected data format:
     {
@@ -92,90 +224,229 @@ async def analyze_attention(data: Dict[str, Any]):
     }
     """
     try:
-        logger.info("Analyzing attention patterns")
+        logger.info("="*60)
+        logger.info("🧠 Attention analysis request received")
+        
+        data = request.get_json()
+        
+        if not data:
+            logger.warning("❌ No JSON data in request")
+            return jsonify({"error": "No data provided"}), 400
+        
+        logger.debug(f"Request data keys: {list(data.keys())}")
         
         # Placeholder for attention analysis
-        # In production, this would use ML models to analyze:
-        # - IMU data for device orientation
-        # - App state for context switches
-        # - Gaze data for visual attention
+        # In production: use ML models to analyze IMU, app state, gaze data
         
-        return {
+        result = {
             "status": "success",
             "attention_score": 0.85,
             "low_attention_periods": [
-                {"start": 300, "end": 450, "reason": "device_switched"},
-                {"start": 1200, "end": 1380, "reason": "phone_movement"}
+                {"start": 300, "end": 450, "reason": "设备切换"},
+                {"start": 1200, "end": 1380, "reason": "手机移动"}
             ]
         }
+        
+        logger.info(f"✅ Attention analysis complete: score={result['attention_score']}")
+        
+        return jsonify(result)
+    
     except Exception as e:
-        logger.error(f"Error analyzing attention: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"❌ Error analyzing attention: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
-@app.post("/api/v1/analyze/keyframes")
-async def extract_keyframes(video_id: str):
+
+@app.route('/api/v1/analyze/keyframes', methods=['POST'])
+def extract_keyframes():
     """
-    Extract key frames from video (PPT changes, whiteboard updates)
+    从视频中提取关键帧（PPT变化、白板更新）
     """
     try:
+        logger.info("="*60)
+        logger.info("🖼️  Keyframe extraction request received")
+        
+        data = request.get_json()
+        
+        if not data or 'video_id' not in data:
+            logger.warning("❌ No video_id in request")
+            return jsonify({"error": "video_id is required"}), 400
+        
+        video_id = data['video_id']
         logger.info(f"Extracting keyframes for video: {video_id}")
         
         # Placeholder for keyframe extraction
-        # In production, this would use CV algorithms to detect:
-        # - Scene changes (PPT slides)
-        # - Content changes (whiteboard updates)
+        # In production: use OpenCV for scene detection
         
-        return {
+        result = {
             "status": "success",
             "video_id": video_id,
             "keyframes": [
-                {"timestamp": 5.3, "frame_id": "frame_001", "change_type": "slide_change"},
-                {"timestamp": 12.7, "frame_id": "frame_002", "change_type": "slide_change"},
-                {"timestamp": 25.1, "frame_id": "frame_003", "change_type": "slide_change"},
+                {"timestamp": 5.3, "frame_id": "frame_001", "change_type": "幻灯片变化"},
+                {"timestamp": 12.7, "frame_id": "frame_002", "change_type": "幻灯片变化"},
+                {"timestamp": 25.1, "frame_id": "frame_003", "change_type": "幻灯片变化"},
             ]
         }
+        
+        logger.info(f"✅ Extracted {len(result['keyframes'])} keyframes")
+        
+        return jsonify(result)
+    
     except Exception as e:
-        logger.error(f"Error extracting keyframes: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"❌ Error extracting keyframes: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
-@app.get("/api/v1/meetings/{meeting_id}/summary")
+
+@app.route('/api/v1/meetings/<meeting_id>/summary', methods=['GET'])
 async def get_meeting_summary(meeting_id: str):
     """
-    Get AI-generated summary for a meeting
+    获取会议的AI生成摘要
+    使用 Silicon Flow DeepSeek LLM
     """
     try:
-        logger.info(f"Generating summary for meeting: {meeting_id}")
+        logger.info("="*60)
+        logger.info(f"📝 Summary request for meeting: {meeting_id}")
         
-        # Placeholder for summary generation
-        # In production, this would use LLM to generate:
-        # - Executive summary
-        # - Key points
-        # - Action items with timestamps
+        # In production: retrieve transcript and context from database
+        # For now, use mock data
         
-        return {
-            "meeting_id": meeting_id,
-            "summary": {
-                "title": "Product Strategy Meeting",
-                "executive_summary": "Team reviewed Q4 roadmap and finalized marketing strategy",
-                "key_points": [
-                    "Q4 feature prioritization completed",
-                    "Budget allocation approved",
-                    "Marketing timeline adjusted"
-                ],
-                "action_items": [
-                    {
-                        "task": "Finalize feature specifications",
-                        "assignee": "Sarah Chen",
-                        "due_date": "2026-02-05",
-                        "timestamp": 754
-                    }
-                ]
+        mock_transcript = """
+        会议开始时间: 14:00
+        
+        张三: 大家好，今天我们讨论Q4的产品路线图。
+        李四: 我认为我们应该优先考虑用户反馈最多的功能。
+        王五: 同意。我们的数据显示，用户最关心的是性能优化。
+        张三: 好的，那我们先把性能优化列为首要任务。
+        李四: 我会在下周五前完成功能规格说明。
+        王五: 预算方面，我们已经获得批准。
+        """
+        
+        logger.info("🤖 Calling LLM for summary generation...")
+        
+        messages = [
+            {
+                "role": "system",
+                "content": "你是一个专业的会议助手。请分析会议记录，生成结构化的摘要，包括：1) 执行摘要 2) 关键要点 3) 行动项（带负责人和截止日期）。请用中文回复，格式清晰。"
+            },
+            {
+                "role": "user",
+                "content": f"请为以下会议记录生成摘要：\n\n{mock_transcript}"
             }
-        }
+        ]
+        
+        try:
+            summary_text = await call_llm(messages)
+            
+            logger.info("✅ LLM summary generated successfully")
+            logger.debug(f"Summary: {summary_text}")
+            
+            # Parse the summary (in production, use more sophisticated parsing)
+            result = {
+                "meeting_id": meeting_id,
+                "summary": {
+                    "title": "产品策略会议",
+                    "generated_summary": summary_text,
+                    "executive_summary": "团队审查了Q4路线图并最终确定了营销策略",
+                    "key_points": [
+                        "完成Q4功能优先级排序",
+                        "预算分配已批准",
+                        "调整了营销时间表"
+                    ],
+                    "action_items": [
+                        {
+                            "task": "完成功能规格说明",
+                            "assignee": "李四",
+                            "due_date": "下周五",
+                            "timestamp": 754
+                        }
+                    ],
+                    "generated_at": datetime.now().isoformat()
+                }
+            }
+            
+        except Exception as llm_error:
+            logger.error(f"❌ LLM call failed: {str(llm_error)}")
+            # Fallback to static summary if LLM fails
+            result = {
+                "meeting_id": meeting_id,
+                "summary": {
+                    "title": "产品策略会议",
+                    "executive_summary": "团队审查了Q4路线图并最终确定了营销策略",
+                    "key_points": [
+                        "完成Q4功能优先级排序",
+                        "预算分配已批准",
+                        "调整了营销时间表"
+                    ],
+                    "action_items": [
+                        {
+                            "task": "完成功能规格说明",
+                            "assignee": "李四",
+                            "due_date": "2026-02-05",
+                            "timestamp": 754
+                        }
+                    ],
+                    "note": "LLM服务暂时不可用，显示静态摘要",
+                    "generated_at": datetime.now().isoformat()
+                }
+            }
+        
+        return jsonify(result)
+    
     except Exception as e:
-        logger.error(f"Error generating summary: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"❌ Error generating summary: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/v1/test-llm', methods=['POST'])
+async def test_llm():
+    """
+    测试 LLM API 连接
+    """
+    try:
+        logger.info("="*60)
+        logger.info("🧪 Testing LLM API connection...")
+        
+        data = request.get_json()
+        prompt = data.get('prompt', '你好，请用一句话介绍你自己。')
+        
+        logger.info(f"Test prompt: {prompt}")
+        
+        messages = [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+        
+        response = await call_llm(messages)
+        
+        logger.info("✅ LLM test successful!")
+        
+        return jsonify({
+            "status": "success",
+            "response": response,
+            "model": SILICON_FLOW_MODEL,
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    except Exception as e:
+        logger.error(f"❌ LLM test failed: {str(e)}", exc_info=True)
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }), 500
+
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    logger.info("="*80)
+    logger.info("🚀 Starting Flask server...")
+    logger.info(f"   Host: {FLASK_HOST}")
+    logger.info(f"   Port: {FLASK_PORT}")
+    logger.info(f"   Debug: {FLASK_DEBUG}")
+    logger.info("="*80)
+    
+    app.run(
+        host=FLASK_HOST,
+        port=FLASK_PORT,
+        debug=FLASK_DEBUG
+    )
