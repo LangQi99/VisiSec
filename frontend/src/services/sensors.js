@@ -6,17 +6,27 @@
  * - IMU数据 (加速度计、陀螺仪)
  * - 相机流 (前置和后置)
  * - 应用状态
+ * 
+ * 权限说明：
+ * - iOS: 需要通过DeviceMotionEvent.requestPermission()请求运动传感器权限
+ * - Android: 传感器默认可用，无需显式权限请求（Android 10+需要ACTIVITY_RECOGNITION权限）
  */
 
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { Motion } from '@capacitor/motion'
 import { Device } from '@capacitor/device'
 
-// 日志辅助函数
+// 日志辅助函数 - 增强版，包含时间戳和更详细的错误信息
 const log = (emoji, message, data = null) => {
-  console.log(`${emoji} [Sensors] ${message}`)
+  const timestamp = new Date().toISOString().split('T')[1].slice(0, -1)
+  console.log(`${emoji} [${timestamp}] [Sensors] ${message}`)
   if (data) {
-    console.log('   📊 Data:', data)
+    if (data instanceof Error) {
+      console.log('   ❌ Error:', data.message)
+      console.log('   📍 Stack:', data.stack)
+    } else {
+      console.log('   📊 Data:', JSON.stringify(data, null, 2))
+    }
   }
 }
 
@@ -29,6 +39,23 @@ class IMUSensorManager {
     this.data = []
     this.listener = null
     this.maxDataPoints = 1000 // 限制内存使用
+    this.platform = null // 存储平台信息
+  }
+
+  /**
+   * 检测平台类型
+   */
+  async detectPlatform() {
+    try {
+      const info = await Device.getInfo()
+      this.platform = info.platform
+      log('🔍', `Platform detected: ${this.platform}`, info)
+      return this.platform
+    } catch (error) {
+      log('⚠️', 'Failed to detect platform, defaulting to web', error)
+      this.platform = 'web'
+      return this.platform
+    }
   }
 
   async start() {
@@ -40,30 +67,58 @@ class IMUSensorManager {
     try {
       log('🚀', 'Starting IMU sensors...')
       
-      // 请求传感器权限
-      const permission = await Motion.requestPermission()
-      log('✅', 'IMU permission granted', permission)
+      // 检测平台
+      await this.detectPlatform()
+      
+      // 请求传感器权限（仅iOS需要，通过Web API）
+      // Android不需要显式权限请求，传感器默认可用
+      if (typeof DeviceMotionEvent !== 'undefined' && 
+          typeof DeviceMotionEvent.requestPermission === 'function') {
+        // iOS 13+ Safari需要请求权限
+        log('📱', 'Detected iOS - requesting motion permission...')
+        try {
+          const permissionState = await DeviceMotionEvent.requestPermission()
+          log('✅', 'Motion permission state:', permissionState)
+          
+          if (permissionState !== 'granted') {
+            throw new Error(`Motion permission denied: ${permissionState}`)
+          }
+        } catch (error) {
+          log('❌', 'Failed to request iOS motion permission', error)
+          throw error
+        }
+      } else {
+        // Android或不需要权限的浏览器
+        log('✅', `Motion sensors available on ${this.platform} (no permission required)`)
+      }
 
       // 监听加速度计和陀螺仪数据
       this.listener = await Motion.addListener('accel', (event) => {
-        const dataPoint = {
-          timestamp: Date.now(),
-          acceleration: event.acceleration,
-          accelerationIncludingGravity: event.accelerationIncludingGravity,
-          rotationRate: event.rotationRate,
-          interval: event.interval
-        }
+        try {
+          const dataPoint = {
+            timestamp: Date.now(),
+            acceleration: event.acceleration,
+            accelerationIncludingGravity: event.accelerationIncludingGravity,
+            rotationRate: event.rotationRate,
+            interval: event.interval
+          }
 
-        this.data.push(dataPoint)
-        
-        // 限制数据点数量，避免内存溢出
-        if (this.data.length > this.maxDataPoints) {
-          this.data.shift()
-        }
+          this.data.push(dataPoint)
+          
+          // 限制数据点数量，避免内存溢出
+          if (this.data.length > this.maxDataPoints) {
+            this.data.shift()
+          }
 
-        // 定期打印日志（每100个数据点）
-        if (this.data.length % 100 === 0) {
-          log('📊', `IMU data collected: ${this.data.length} points`)
+          // 定期打印日志（每100个数据点）
+          if (this.data.length % 100 === 0) {
+            log('📊', `IMU data collected: ${this.data.length} points`, {
+              latestAcceleration: dataPoint.acceleration,
+              latestRotation: dataPoint.rotationRate
+            })
+          }
+        } catch (error) {
+          log('⚠️', 'Error processing IMU data point', error)
         }
       })
 

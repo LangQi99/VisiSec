@@ -36,6 +36,36 @@
     </application>
 
     <!-- Permissions -->
-
+    
+    <!-- 网络权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- 相机权限 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.front" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    
+    <!-- 音频录制权限 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    
+    <!-- 文件存储权限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+                     android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+                     android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    
+    <!-- 传感器权限（Android 10+需要ACTIVITY_RECOGNITION权限访问某些传感器） -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    
+    <!-- 高性能传感器访问 -->
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
+    
+    <!-- 传感器特性声明 -->
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.gyroscope" android:required="false" />
 </manifest>
