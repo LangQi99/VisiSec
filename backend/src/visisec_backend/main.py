@@ -45,10 +45,11 @@ FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
 # Log critical configuration
 logger.info(f"Silicon Flow API URL: {SILICON_FLOW_API_URL}")
 logger.info(f"Silicon Flow Model: {SILICON_FLOW_MODEL}")
-logger.info(f"API Key configured: {'Yes' if SILICON_FLOW_API_KEY else 'No (WARNING!)'}")
+logger.info(f"API Key configured: {'Yes' if SILICON_FLOW_API_KEY else 'No'}")
 logger.info(f"Flask Host: {FLASK_HOST}")
 logger.info(f"Flask Port: {FLASK_PORT}")
 logger.info(f"Flask Debug Mode: {FLASK_DEBUG}")
+logger.info(f"Allowed CORS Origins: {os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:8080')}")
 logger.info("="*80)
 
 if not SILICON_FLOW_API_KEY:
@@ -56,10 +57,17 @@ if not SILICON_FLOW_API_KEY:
     logger.warning("⚠️  Please set it in .env file")
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for frontend communication
+# CORS middleware for frontend communication
+# In production, restrict to specific origins
+allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:8080').split(',')
+CORS(app, origins=allowed_origins)
 
 # Store for meeting data (in production, use a database)
 meetings_db = {}
+
+# Configuration constants
+MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 100 * 1024 * 1024))  # 100MB default
+MAX_PROMPT_LENGTH = int(os.getenv('MAX_PROMPT_LENGTH', 2000))  # 2000 chars default
 
 
 def async_route(f):
@@ -162,10 +170,15 @@ def upload_audio():
             logger.warning(f"❌ Invalid file type: {file.content_type}")
             return jsonify({"error": "Invalid file type. Must be audio."}), 400
         
+        # Check file size using content_length
+        if request.content_length and request.content_length > MAX_FILE_SIZE:
+            logger.warning(f"❌ File too large: {request.content_length} bytes")
+            return jsonify({"error": f"File too large. Maximum size is {MAX_FILE_SIZE} bytes"}), 400
+        
         logger.info(f"✅ Received audio file: {file.filename}")
         logger.info(f"   Content-Type: {file.content_type}")
-        logger.info(f"   Size: {len(file.read())} bytes")
-        file.seek(0)  # Reset file pointer
+        if request.content_length:
+            logger.info(f"   Size: {request.content_length} bytes")
         
         # In production: save file, process with Whisper, etc.
         
@@ -177,7 +190,7 @@ def upload_audio():
     
     except Exception as e:
         logger.error(f"❌ Error uploading audio: {str(e)}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @app.route('/api/v1/upload/video', methods=['POST'])
@@ -204,10 +217,15 @@ def upload_video():
             logger.warning(f"❌ Invalid file type: {file.content_type}")
             return jsonify({"error": "Invalid file type. Must be video."}), 400
         
+        # Check file size using content_length
+        if request.content_length and request.content_length > MAX_FILE_SIZE:
+            logger.warning(f"❌ File too large: {request.content_length} bytes")
+            return jsonify({"error": f"File too large. Maximum size is {MAX_FILE_SIZE} bytes"}), 400
+        
         logger.info(f"✅ Received video file: {file.filename}")
         logger.info(f"   Content-Type: {file.content_type}")
-        logger.info(f"   Size: {len(file.read())} bytes")
-        file.seek(0)  # Reset file pointer
+        if request.content_length:
+            logger.info(f"   Size: {request.content_length} bytes")
         
         # In production: save file, extract keyframes with OpenCV, etc.
         
@@ -219,7 +237,7 @@ def upload_video():
     
     except Exception as e:
         logger.error(f"❌ Error uploading video: {str(e)}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @app.route('/api/v1/analyze/attention', methods=['POST'])
@@ -421,7 +439,16 @@ async def test_llm():
         data = request.get_json()
         prompt = data.get('prompt', '你好，请用一句话介绍你自己。')
         
-        logger.info(f"Test prompt: {prompt}")
+        # Validate prompt length
+        if len(prompt) > MAX_PROMPT_LENGTH:
+            logger.warning(f"❌ Prompt too long: {len(prompt)} characters")
+            return jsonify({
+                "status": "error",
+                "error": f"Prompt too long. Maximum length is {MAX_PROMPT_LENGTH} characters.",
+                "timestamp": datetime.now().isoformat()
+            }), 400
+        
+        logger.info(f"Test prompt length: {len(prompt)} characters")
         
         messages = [
             {
@@ -441,11 +468,19 @@ async def test_llm():
             "timestamp": datetime.now().isoformat()
         })
     
+    except ValueError as e:
+        # LLM configuration error
+        logger.error(f"❌ LLM configuration error: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "error": "LLM service not configured",
+            "timestamp": datetime.now().isoformat()
+        }), 503
     except Exception as e:
         logger.error(f"❌ LLM test failed: {str(e)}", exc_info=True)
         return jsonify({
             "status": "error",
-            "error": str(e),
+            "error": "Internal server error",
             "timestamp": datetime.now().isoformat()
         }), 500
 

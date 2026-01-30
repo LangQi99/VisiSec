@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { analyzeAttention } from '../services/api'
 
@@ -160,7 +160,10 @@ const toggleRecording = async () => {
     // Stop recording
     isRecording.value = false
     isPaused.value = false
-    clearInterval(intervalId)
+    if (intervalId) {
+      clearInterval(intervalId)
+      intervalId = null
+    }
     
     // Test API call with sample data
     try {
@@ -177,18 +180,19 @@ const toggleRecording = async () => {
       }
       
       console.log('✅ Analysis complete:', result)
+      
+      // Only navigate on success
+      setTimeout(() => {
+        router.push('/timeline/1')
+      }, 2000)
     } catch (error) {
       console.error('❌ Analysis failed:', error)
       apiStatus.value = {
         success: false,
         message: '⚠️ 后端分析失败，但录制已保存'
       }
+      // Don't navigate on error, let user decide
     }
-    
-    // Navigate to timeline view (simulated)
-    setTimeout(() => {
-      router.push('/timeline/1')
-    }, 2000)
   } else {
     console.log('▶️ Starting recording...')
     // Start recording
@@ -210,5 +214,14 @@ const pauseRecording = () => {
 
 onMounted(() => {
   console.log('📱 Record component mounted')
+})
+
+onUnmounted(() => {
+  console.log('📱 Record component unmounting')
+  // Clean up interval if component is destroyed
+  if (intervalId) {
+    clearInterval(intervalId)
+    intervalId = null
+  }
 })
 </script>

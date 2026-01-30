@@ -35,6 +35,11 @@ export async function checkHealth() {
   
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`)
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+    
     const data = await response.json()
     logAPIResponse('GET', endpoint, data)
     return data
@@ -59,6 +64,11 @@ export async function uploadAudio(file) {
       method: 'POST',
       body: formData
     })
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      throw new Error(errorData.error || `HTTP ${response.status}`)
+    }
     
     const data = await response.json()
     logAPIResponse('POST', endpoint, data)
@@ -85,6 +95,11 @@ export async function uploadVideo(file) {
       body: formData
     })
     
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      throw new Error(errorData.error || `HTTP ${response.status}`)
+    }
+    
     const data = await response.json()
     logAPIResponse('POST', endpoint, data)
     return data
@@ -109,6 +124,11 @@ export async function analyzeAttention(data) {
       },
       body: JSON.stringify(data)
     })
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      throw new Error(errorData.error || `HTTP ${response.status}`)
+    }
     
     const result = await response.json()
     logAPIResponse('POST', endpoint, result)
@@ -135,6 +155,11 @@ export async function extractKeyframes(videoId) {
       body: JSON.stringify({ video_id: videoId })
     })
     
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      throw new Error(errorData.error || `HTTP ${response.status}`)
+    }
+    
     const data = await response.json()
     logAPIResponse('POST', endpoint, data)
     return data
@@ -153,6 +178,12 @@ export async function getMeetingSummary(meetingId) {
   
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`)
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      throw new Error(errorData.error || `HTTP ${response.status}`)
+    }
+    
     const data = await response.json()
     logAPIResponse('GET', endpoint, data)
     return data
@@ -177,6 +208,11 @@ export async function testLLM(prompt = '你好，请用一句话介绍你自己�
       },
       body: JSON.stringify({ prompt })
     })
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      throw new Error(errorData.error || `HTTP ${response.status}`)
+    }
     
     const data = await response.json()
     logAPIResponse('POST', endpoint, data)
