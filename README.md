@@ -230,7 +230,11 @@ VisiSec 需要访问多种设备传感器和硬件。**请仔细阅读** [权限
 - 💾 存储权限配置
 - 🐛 常见权限问题解决方案
 
-**重要**: 如果您遇到 "Motion.requestPermission() is not implemented on android" 错误，这是正常的！Android 不需要显式请求运动传感器权限。详见权限配置指南。
+**重要**: 如果您遇到 "Motion.requestPermission() is not implemented on android" 错误，这个问题已经修复！新版本使用正确的平台特定权限处理方式：
+- **iOS**: 使用 `DeviceMotionEvent.requestPermission()` 
+- **Android**: 基础传感器默认可用，无需显式请求
+
+详见[权限配置指南](frontend/PERMISSIONS_GUIDE.md)。
 
 ---
 
