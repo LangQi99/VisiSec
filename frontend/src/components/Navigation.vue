@@ -19,21 +19,21 @@
               class="text-gray-600 hover:text-ink transition-colors font-medium"
               active-class="text-ink font-semibold"
             >
-              Home
+              首页
             </router-link>
             <router-link 
               to="/record" 
               class="text-gray-600 hover:text-ink transition-colors font-medium"
               active-class="text-ink font-semibold"
             >
-              Record
+              录制
             </router-link>
           </div>
         </div>
         
         <div class="flex items-center space-x-4">
           <button class="btn-secondary text-sm">
-            Sign In
+            登录
           </button>
         </div>
       </div>

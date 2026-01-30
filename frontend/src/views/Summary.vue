@@ -5,37 +5,35 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        <span>Back to Timeline</span>
+        <span>返回时间轴</span>
       </router-link>
       
-      <h1 class="text-4xl font-serif font-bold text-ink mb-2">Meeting Summary</h1>
-      <p class="text-gray-600">AI-generated insights and action items</p>
+      <h1 class="text-4xl font-serif font-bold text-ink mb-2">会议纪要</h1>
+      <p class="text-gray-600">AI生成的见解和待办事项</p>
     </div>
 
     <!-- Meeting Overview -->
     <div class="card mb-8">
-      <h2 class="text-2xl font-serif font-bold text-ink mb-4">Product Strategy Meeting</h2>
+      <h2 class="text-2xl font-serif font-bold text-ink mb-4">产品策略会议</h2>
       <div class="grid grid-cols-3 gap-6 mb-6">
         <div>
-          <div class="text-sm text-gray-500 mb-1">Date</div>
-          <div class="font-medium">January 30, 2026</div>
+          <div class="text-sm text-gray-500 mb-1">日期</div>
+          <div class="font-medium">2026年1月30日</div>
         </div>
         <div>
-          <div class="text-sm text-gray-500 mb-1">Duration</div>
-          <div class="font-medium">45 minutes</div>
+          <div class="text-sm text-gray-500 mb-1">时长</div>
+          <div class="font-medium">45 分钟</div>
         </div>
         <div>
-          <div class="text-sm text-gray-500 mb-1">Participants</div>
-          <div class="font-medium">5 people</div>
+          <div class="text-sm text-gray-500 mb-1">参与者</div>
+          <div class="font-medium">5 人</div>
         </div>
       </div>
       
       <div class="bg-terracotta/5 border border-terracotta/20 rounded-xl p-4">
-        <h3 class="font-semibold text-ink mb-2">Executive Summary</h3>
+        <h3 class="font-semibold text-ink mb-2">执行摘要</h3>
         <p class="text-gray-700">
-          The team reviewed Q4 product roadmap, discussed budget allocations for new features, 
-          and finalized the marketing strategy for the upcoming launch. Key decisions were made 
-          regarding feature prioritization and timeline adjustments.
+          团队审查了Q4产品路线图，讨论了新功能的预算分配，并确定了即将推出的营销策略。关于功能优先级和时间表调整的关键决定已经做出。
         </p>
       </div>
     </div>
@@ -43,12 +41,12 @@
     <!-- Action Items -->
     <div class="card mb-8">
       <div class="flex items-center justify-between mb-6">
-        <h3 class="text-2xl font-serif font-bold text-ink">Action Items</h3>
+        <h3 class="text-2xl font-serif font-bold text-ink">待办事项</h3>
         <button class="btn-secondary text-sm">
           <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          Add to Calendar
+          添加到日历
         </button>
       </div>
       
@@ -93,12 +91,12 @@
     <!-- Full Transcript -->
     <div class="card mb-8">
       <div class="flex items-center justify-between mb-6">
-        <h3 class="text-2xl font-serif font-bold text-ink">Transcript</h3>
+        <h3 class="text-2xl font-serif font-bold text-ink">逐字稿</h3>
         <button class="btn-secondary text-sm">
           <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
-          Download
+          下载
         </button>
       </div>
       
@@ -121,7 +119,7 @@
 
     <!-- Extracted Images -->
     <div class="card">
-      <h3 class="text-2xl font-serif font-bold text-ink mb-6">Key Visuals & OCR</h3>
+      <h3 class="text-2xl font-serif font-bold text-ink mb-6">关键视觉与OCR</h3>
       
       <div class="grid grid-cols-2 gap-6">
         <div 
@@ -149,41 +147,41 @@ import { ref } from 'vue'
 
 const actionItems = ref([
   {
-    title: 'Finalize feature specifications',
-    description: 'Complete detailed specs for Q4 features and share with engineering team',
+    title: '完成功能规格说明书',
+    description: '完成Q4功能的详细规格说明书并与工程团队分享',
     assignee: 'Sarah Chen',
-    dueDate: 'Feb 5, 2026',
+    dueDate: '2026年2月5日',
     timestamp: '12:34'
   },
   {
-    title: 'Review budget allocation',
-    description: 'Validate proposed budget distribution across teams',
+    title: '审查预算分配',
+    description: '验证各团队的拟议预算分配',
     assignee: 'Michael Park',
-    dueDate: 'Feb 3, 2026',
+    dueDate: '2026年2月3日',
     timestamp: '23:15'
   },
   {
-    title: 'Update marketing timeline',
-    description: 'Adjust campaign dates based on new product launch schedule',
+    title: '更新营销时间表',
+    description: '根据新产品发布时间表调整活动日期',
     assignee: 'Emily Rodriguez',
-    dueDate: 'Feb 8, 2026',
+    dueDate: '2026年2月8日',
     timestamp: '38:42'
   }
 ])
 
 const transcript = ref([
-  { time: '00:00', speaker: 'Sarah', text: 'Good morning everyone. Let\'s start with the Q4 roadmap overview.' },
-  { time: '00:15', speaker: 'Michael', text: 'Thanks Sarah. I\'ve prepared slides covering our key initiatives.' },
-  { time: '00:32', speaker: 'Sarah', text: 'Great. Can you walk us through the timeline?' },
-  { time: '01:05', speaker: 'Michael', text: 'Absolutely. We\'re targeting a late November launch for the core features.' },
-  { time: '01:28', speaker: 'Emily', text: 'That aligns well with our marketing calendar.' },
-  { time: '02:10', speaker: 'Sarah', text: 'Perfect. Let\'s discuss the budget implications next.' },
+  { time: '00:00', speaker: 'Sarah', text: '大家早上好。让我们从Q4路线图概览开始。' },
+  { time: '00:15', speaker: 'Michael', text: '谢谢Sarah。我准备了涵盖我们关键举措的幻灯片。' },
+  { time: '00:32', speaker: 'Sarah', text: '太好了。你能带我们过一遍时间表吗？' },
+  { time: '01:05', speaker: 'Michael', text: '当然。我们的目标是在11月下旬发布核心功能。' },
+  { time: '01:28', speaker: 'Emily', text: '这与我们的营销日历非常吻合。' },
+  { time: '02:10', speaker: 'Sarah', text: '完美。接下来让我们讨论预算影响。' },
 ])
 
 const extractedImages = ref([
-  { time: '05:30', ocrText: 'Q4 Product Roadmap - Feature Prioritization Matrix' },
-  { time: '12:45', ocrText: 'Budget Allocation: Engineering 45%, Marketing 30%, Operations 25%' },
-  { time: '25:20', ocrText: 'Marketing Strategy: Multi-channel campaign Q4 2026' },
-  { time: '35:15', ocrText: 'Action Items & Deliverables - Timeline Overview' },
+  { time: '05:30', ocrText: 'Q4产品路线图 - 功能优先级矩阵' },
+  { time: '12:45', ocrText: '预算分配：工程45%，营销30%，运营25%' },
+  { time: '25:20', ocrText: '营销策略：Q4 2026多渠道活动' },
+  { time: '35:15', ocrText: '待办事项和交付物 - 时间表概览' },
 ])
 </script>

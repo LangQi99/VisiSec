@@ -5,16 +5,16 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        <span>Back to Home</span>
+        <span>返回首页</span>
       </router-link>
       
       <div class="flex justify-between items-start">
         <div>
-          <h1 class="text-4xl font-serif font-bold text-ink mb-2">Meeting Timeline</h1>
-          <p class="text-gray-600">Visual heatmap of attention and key moments</p>
+          <h1 class="text-4xl font-serif font-bold text-ink mb-2">会议时间轴</h1>
+          <p class="text-gray-600">注意力热力图与关键时刻</p>
         </div>
         <router-link :to="`/summary/${$route.params.id}`" class="btn-primary">
-          View Summary
+          查看摘要
         </router-link>
       </div>
     </div>
@@ -23,21 +23,21 @@
     <div class="card mb-8">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h2 class="text-2xl font-serif font-bold text-ink">Product Strategy Meeting</h2>
-          <p class="text-gray-500">January 30, 2026 · 45 minutes</p>
+          <h2 class="text-2xl font-serif font-bold text-ink">产品策略会议</h2>
+          <p class="text-gray-500">2026年1月30日 · 45 分钟</p>
         </div>
         <div class="flex space-x-2">
           <button class="btn-secondary text-sm">
             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Export
+            导出
           </button>
           <button class="btn-secondary text-sm">
             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
             </svg>
-            Share
+            分享
           </button>
         </div>
       </div>
@@ -45,7 +45,7 @@
 
     <!-- Attention Heatmap -->
     <div class="card mb-8">
-      <h3 class="text-xl font-serif font-bold text-ink mb-4">Attention Heatmap</h3>
+      <h3 class="text-xl font-serif font-bold text-ink mb-4">注意力热力图</h3>
       <div class="relative">
         <!-- Timeline -->
         <div class="h-24 bg-gradient-to-r from-green-400 via-yellow-400 to-red-400 rounded-xl mb-4 relative overflow-hidden">
@@ -71,22 +71,22 @@
         </div>
         
         <!-- Legend -->
-        <div class="flex items-center justify-center space-x-6 text-sm">
+        <div class="flex flex-wrap items-center justify-center gap-4 text-sm mt-4 md:space-x-6 md:gap-0">
           <div class="flex items-center space-x-2">
             <div class="w-4 h-4 bg-green-400 rounded"></div>
-            <span class="text-gray-600">High Attention</span>
+            <span class="text-gray-600">高关注度</span>
           </div>
           <div class="flex items-center space-x-2">
             <div class="w-4 h-4 bg-yellow-400 rounded"></div>
-            <span class="text-gray-600">Medium</span>
+            <span class="text-gray-600">中</span>
           </div>
           <div class="flex items-center space-x-2">
             <div class="w-4 h-4 bg-red-400 rounded"></div>
-            <span class="text-gray-600">Low Attention</span>
+            <span class="text-gray-600">低关注度</span>
           </div>
           <div class="flex items-center space-x-2">
             <div class="w-4 h-4 bg-white rounded border-2 border-ink"></div>
-            <span class="text-gray-600">Key Moment</span>
+            <span class="text-gray-600">关键时刻</span>
           </div>
         </div>
       </div>
@@ -94,16 +94,16 @@
 
     <!-- Key Moments -->
     <div class="card">
-      <h3 class="text-xl font-serif font-bold text-ink mb-6">Key Moments</h3>
+      <h3 class="text-xl font-serif font-bold text-ink mb-6">关键时刻</h3>
       
       <div class="space-y-6">
         <div 
           v-for="moment in keyMoments" 
           :key="moment.time"
-          class="flex space-x-4 pb-6 border-b border-gray-100 last:border-0"
+          class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 pb-6 border-b border-gray-100 last:border-0"
         >
           <!-- Thumbnail -->
-          <div class="flex-shrink-0 w-48 h-32 bg-gray-200 rounded-xl overflow-hidden">
+          <div class="flex-shrink-0 w-full md:w-48 h-48 md:h-32 bg-gray-200 rounded-xl overflow-hidden">
             <div class="w-full h-full flex items-center justify-center text-gray-400">
               <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -123,7 +123,7 @@
                 moment.attention === 'medium' ? 'bg-yellow-100 text-yellow-700' :
                 'bg-red-100 text-red-700'
               ]">
-                {{ moment.attention.charAt(0).toUpperCase() + moment.attention.slice(1) }} Attention
+                {{ moment.attention.charAt(0).toUpperCase() + moment.attention.slice(1) }} 关注度
               </span>
             </div>
             
@@ -156,29 +156,29 @@ const keyMoments = ref([
   {
     time: 5,
     duration: 45,
-    title: 'Project Overview Presentation',
-    description: 'Opening slide with Q4 roadmap overview. High engagement detected.',
+    title: 'Q4 战略路线图',
+    description: 'Q4 路线图开场演示。参会者注意力高度集中，互动频繁。',
     attention: 'high'
   },
   {
     time: 12,
     duration: 32,
-    title: 'Budget Discussion',
-    description: 'Detailed financial breakdown. Medium attention with some device switching.',
+    title: '年度预算研讨',
+    description: '财务明细深度解析。关注度中等，检测到部分设备切换行为。',
     attention: 'medium'
   },
   {
     time: 25,
     duration: 28,
-    title: 'Marketing Strategy',
-    description: 'Low attention period - phone usage detected.',
+    title: '市场营销策略',
+    description: '市场推广方案宣讲。关注度下降，系统检测到手机使用行为。',
     attention: 'low'
   },
   {
     time: 35,
     duration: 52,
-    title: 'Action Items & Next Steps',
-    description: 'Final summary with task assignments. High focus period.',
+    title: '行动计划与总结',
+    description: '会议总结与任务分配。全员注意力回升，聚焦关键行动项。',
     attention: 'high'
   }
 ])
