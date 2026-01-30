@@ -227,6 +227,15 @@ const startRecording = async () => {
     
     sensorStatus.value = sensorResult.sensors
     
+    // 显示传感器状态信息
+    if (sensorResult.errors && sensorResult.errors.length > 0) {
+      const unavailable = sensorResult.errors.map(e => e.sensor).join(', ')
+      apiStatus.value = {
+        success: true,
+        message: `⚠️ 部分传感器不可用 (${unavailable})，但录制可以继续`
+      }
+    }
+    
     // 启动WebSocket会话
     await wsClient.startSession(meetingTitle.value || 'Untitled Meeting')
     console.log('✅ WebSocket session started')
@@ -247,39 +256,47 @@ const startRecording = async () => {
       }
     }, 5000)
     
-    // 每10秒捕获关键帧并分析
-    keyframeInterval = setInterval(async () => {
-      if (!isPaused.value) {
-        try {
-          // 捕获后置摄像头画面
-          const frame = await sensorManager.captureKeyframe('REAR')
-          const sensorData = await sensorManager.collectAllData()
-          
-          // 使用边缘模型处理
-          const analysis = await edgeModelManager.processFrame(
-            frame.base64,
-            sensorData
-          )
-          
-          // 如果是关键帧，发送到服务器
-          if (analysis.isKeyframe) {
-            wsClient.sendKeyframe({
-              ...frame,
-              ...analysis
-            })
-            keyframeCount.value++
-            console.log(`🖼️ Keyframe #${keyframeCount.value} sent to server`)
+    // 每10秒捕获关键帧并分析（仅在相机可用时）
+    if (sensorStatus.value.camera) {
+      keyframeInterval = setInterval(async () => {
+        if (!isPaused.value) {
+          try {
+            // 捕获后置摄像头画面
+            const frame = await sensorManager.captureKeyframe('REAR')
+            const sensorData = await sensorManager.collectAllData()
+            
+            // 使用边缘模型处理
+            const analysis = await edgeModelManager.processFrame(
+              frame.base64,
+              sensorData
+            )
+            
+            // 如果是关键帧，发送到服务器
+            if (analysis.isKeyframe) {
+              wsClient.sendKeyframe({
+                ...frame,
+                ...analysis
+              })
+              keyframeCount.value++
+              console.log(`🖼️ Keyframe #${keyframeCount.value} sent to server`)
+            }
+          } catch (error) {
+            console.warn('⚠️ Keyframe capture failed:', error)
           }
-        } catch (error) {
-          console.warn('⚠️ Keyframe capture failed:', error)
         }
-      }
-    }, 10000)
+      }, 10000)
+    } else {
+      console.log('📸 Camera not available, skipping keyframe capture')
+    }
     
     isRecording.value = true
-    apiStatus.value = {
-      success: true,
-      message: '🎬 录制进行中...'
+    
+    // 更新成功消息（如果之前没有设置警告消息）
+    if (!apiStatus.value || !apiStatus.value.message.includes('部分传感器')) {
+      apiStatus.value = {
+        success: true,
+        message: '🎬 录制进行中...'
+      }
     }
   } catch (error) {
     console.error('❌ Failed to start recording:', error)
