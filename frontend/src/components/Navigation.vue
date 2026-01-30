@@ -10,7 +10,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
             </div>
-            <span class="text-xl font-serif font-bold text-ink">VisiSec</span>
+            <span class="text-xl font-serif font-bold text-ink">视界秘书</span>
           </router-link>
           
           <div class="hidden md:flex space-x-6">
@@ -19,21 +19,21 @@
               class="text-gray-600 hover:text-ink transition-colors font-medium"
               active-class="text-ink font-semibold"
             >
-              Home
+              首页
             </router-link>
             <router-link 
               to="/record" 
               class="text-gray-600 hover:text-ink transition-colors font-medium"
               active-class="text-ink font-semibold"
             >
-              Record
+              录制会议
             </router-link>
           </div>
         </div>
         
         <div class="flex items-center space-x-4">
           <button class="btn-secondary text-sm">
-            Sign In
+            登录
           </button>
         </div>
       </div>
