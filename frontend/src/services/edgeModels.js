@@ -430,11 +430,13 @@ export class EdgeModelManager {
     try {
       log('⚙️', 'Processing frame...')
       
-      // 并行处理
-      const [sceneChange, attentionScore, ocrResult] = await Promise.all([
-        this.sceneDetector.detectChange(base64Image),
+      // 先进行场景变化检测
+      const sceneChange = await this.sceneDetector.detectChange(base64Image)
+      
+      // 并行处理注意力评分和OCR（如果是关键帧）
+      const [attentionScore, ocrResult] = await Promise.all([
         this.attentionScorer.scoreAttention(sensorData),
-        sceneChange?.isKeyframe ? this.ocr.extractText(base64Image) : null
+        sceneChange.isKeyframe ? this.ocr.extractText(base64Image) : Promise.resolve(null)
       ])
 
       const result = {

@@ -586,16 +586,22 @@ def handle_sensor_data(data):
             emit('error', {'message': 'Invalid session'})
             return
         
+        # 限制内存使用：最多保存1000个数据点
+        MAX_DATA_POINTS = 1000
+        session_data = active_sessions[session_id]['sensor_data']
+        
         # 保存传感器数据
-        active_sessions[session_id]['sensor_data'].append({
+        session_data.append({
             'timestamp': datetime.now().isoformat(),
             'data': data
         })
         
-        logger.debug(f"📊 Sensor data received for session {session_id}")
+        # 如果超过限制，删除最旧的数据
+        if len(session_data) > MAX_DATA_POINTS:
+            removed = session_data.pop(0)
+            logger.debug(f"📦 Removed oldest sensor data point to maintain memory limit")
         
-        # 可以在这里进行实时分析
-        # 例如：注意力评分、异常检测等
+        logger.debug(f"📊 Sensor data received for session {session_id} (total: {len(session_data)})")
         
         # 发送处理确认
         emit('sensor_data_received', {
@@ -628,6 +634,10 @@ def handle_keyframe(data):
         logger.info(f"   Session: {session_id}")
         logger.info(f"   Recording: {recording_id}")
         
+        # 限制内存使用：最多保存100个关键帧
+        MAX_KEYFRAMES = 100
+        keyframes = active_sessions[session_id]['keyframes']
+        
         # 保存关键帧
         keyframe_data = {
             'timestamp': datetime.now().isoformat(),
@@ -636,15 +646,20 @@ def handle_keyframe(data):
             'attention_score': data.get('attention', {}).get('score', 0)
         }
         
-        active_sessions[session_id]['keyframes'].append(keyframe_data)
+        keyframes.append(keyframe_data)
         
-        logger.info(f"✅ Keyframe saved (total: {len(active_sessions[session_id]['keyframes'])})")
+        # 如果超过限制，删除最旧的关键帧
+        if len(keyframes) > MAX_KEYFRAMES:
+            removed = keyframes.pop(0)
+            logger.debug(f"📦 Removed oldest keyframe to maintain memory limit")
+        
+        logger.info(f"✅ Keyframe saved (total: {len(keyframes)})")
         logger.info("="*60)
         
         # 发送处理确认
         emit('keyframe_received', {
             'status': 'received',
-            'keyframe_count': len(active_sessions[session_id]['keyframes']),
+            'keyframe_count': len(keyframes),
             'timestamp': datetime.now().isoformat()
         })
         

@@ -223,6 +223,8 @@ export class WebSocketManager {
   disconnect() {
     if (this.ws) {
       log('🔌', 'Disconnecting WebSocket...')
+      // 设置标志防止自动重连
+      this.reconnectAttempts = this.maxReconnectAttempts
       this.ws.close()
       this.ws = null
       this.isConnected = false
@@ -274,16 +276,20 @@ export class VisiSecWebSocket {
       // 等待会话ID响应
       return new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
+          this.wsManager.off('session_started')  // 清理处理器
           reject(new Error('Session start timeout'))
         }, 5000)
 
-        this.wsManager.on('session_started', (data) => {
+        const handler = (data) => {
           clearTimeout(timeout)
+          this.wsManager.off('session_started')  // 清理处理器
           this.sessionId = data.sessionId
           this.recordingId = data.recordingId
           log('✅', 'Session started', data)
           resolve(data)
-        })
+        }
+
+        this.wsManager.on('session_started', handler)
       })
     } catch (error) {
       log('❌', 'Failed to start session', error)
@@ -353,18 +359,22 @@ export class VisiSecWebSocket {
       // 等待确认
       return new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
+          this.wsManager.off('session_ended')  // 清理处理器
           reject(new Error('Session end timeout'))
         }, 5000)
 
-        this.wsManager.on('session_ended', (data) => {
+        const handler = (data) => {
           clearTimeout(timeout)
+          this.wsManager.off('session_ended')  // 清理处理器
           log('✅', 'Session ended', data)
           
           this.sessionId = null
           this.recordingId = null
           
           resolve(data)
-        })
+        }
+
+        this.wsManager.on('session_ended', handler)
       })
     } catch (error) {
       log('❌', 'Failed to end session', error)

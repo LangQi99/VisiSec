@@ -300,6 +300,9 @@ const stopRecording = async () => {
   try {
     console.log('🛑 Stopping recording...')
     
+    // 收集最终数据 (在停止传感器之前)
+    const finalData = await sensorManager.collectAllData()
+    
     // 停止定时器
     if (intervalId) {
       clearInterval(intervalId)
@@ -323,7 +326,6 @@ const stopRecording = async () => {
     console.log('✅ WebSocket session ended:', sessionResult)
     
     // 发送最终分析请求
-    const finalData = await sensorManager.collectAllData()
     const result = await analyzeAttention({
       imu_data: finalData.imu.data,
       app_state: finalData.appState.history,
@@ -351,6 +353,10 @@ const stopRecording = async () => {
       success: false,
       message: `⚠️ 停止录制时出错: ${error.message}`
     }
+  } finally {
+    // 确保清理状态
+    isRecording.value = false
+    isPaused.value = false
   }
 }
 
