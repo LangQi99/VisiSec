@@ -11,6 +11,7 @@
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { Motion } from '@capacitor/motion'
 import { Device } from '@capacitor/device'
+import { Capacitor } from '@capacitor/core'
 
 // 日志辅助函数
 const log = (emoji, message, data = null) => {
@@ -19,6 +20,11 @@ const log = (emoji, message, data = null) => {
     console.log('   📊 Data:', data)
   }
 }
+
+// 平台检测
+const isNative = () => Capacitor.isNativePlatform()
+const isWeb = () => !Capacitor.isNativePlatform()
+const platform = Capacitor.getPlatform()
 
 /**
  * IMU传感器管理器
@@ -29,6 +35,7 @@ class IMUSensorManager {
     this.data = []
     this.listener = null
     this.maxDataPoints = 1000 // 限制内存使用
+    this.webMotionHandler = null // Web平台的motion handler
   }
 
   async start() {
@@ -38,34 +45,15 @@ class IMUSensorManager {
     }
 
     try {
-      log('🚀', 'Starting IMU sensors...')
+      log('🚀', `Starting IMU sensors on ${platform} platform...`)
       
-      // 请求传感器权限
-      const permission = await Motion.requestPermission()
-      log('✅', 'IMU permission granted', permission)
-
-      // 监听加速度计和陀螺仪数据
-      this.listener = await Motion.addListener('accel', (event) => {
-        const dataPoint = {
-          timestamp: Date.now(),
-          acceleration: event.acceleration,
-          accelerationIncludingGravity: event.accelerationIncludingGravity,
-          rotationRate: event.rotationRate,
-          interval: event.interval
-        }
-
-        this.data.push(dataPoint)
-        
-        // 限制数据点数量，避免内存溢出
-        if (this.data.length > this.maxDataPoints) {
-          this.data.shift()
-        }
-
-        // 定期打印日志（每100个数据点）
-        if (this.data.length % 100 === 0) {
-          log('📊', `IMU data collected: ${this.data.length} points`)
-        }
-      })
+      if (isNative()) {
+        // 原生平台：使用Capacitor Motion API
+        await this.startNative()
+      } else {
+        // Web平台：使用浏览器DeviceMotion API
+        await this.startWeb()
+      }
 
       this.isActive = true
       log('✅', 'IMU sensors started successfully')
@@ -73,6 +61,152 @@ class IMUSensorManager {
       log('❌', 'Failed to start IMU sensors', error)
       throw error
     }
+  }
+
+  /**
+   * 启动原生平台的IMU传感器
+   */
+  async startNative() {
+    log('📱', 'Starting native platform IMU sensors...')
+    
+    // 请求传感器权限
+    const permission = await Motion.requestPermission()
+    log('✅', 'IMU permission granted', permission)
+
+    // 监听加速度计和陀螺仪数据
+    this.listener = await Motion.addListener('accel', (event) => {
+      const dataPoint = {
+        timestamp: Date.now(),
+        acceleration: event.acceleration,
+        accelerationIncludingGravity: event.accelerationIncludingGravity,
+        rotationRate: event.rotationRate,
+        interval: event.interval
+      }
+
+      this.data.push(dataPoint)
+      
+      // 限制数据点数量，避免内存溢出
+      if (this.data.length > this.maxDataPoints) {
+        this.data.shift()
+      }
+
+      // 定期打印日志（每100个数据点）
+      if (this.data.length % 100 === 0) {
+        log('📊', `IMU data collected: ${this.data.length} points`)
+      }
+    })
+  }
+
+  /**
+   * 启动Web平台的IMU传感器（使用浏览器DeviceMotion API）
+   */
+  async startWeb() {
+    log('🌐', 'Starting web platform IMU sensors...')
+    
+    // 检查浏览器是否支持DeviceMotion API
+    if (typeof window === 'undefined' || !window.DeviceMotionEvent) {
+      log('⚠️', 'DeviceMotion API not supported in this browser')
+      // 创建模拟数据以便测试
+      this.startSimulated()
+      return
+    }
+
+    // iOS 13+需要请求权限
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      try {
+        const permission = await DeviceMotionEvent.requestPermission()
+        if (permission !== 'granted') {
+          log('⚠️', 'DeviceMotion permission denied, using simulated data')
+          this.startSimulated()
+          return
+        }
+        log('✅', 'DeviceMotion permission granted')
+      } catch (error) {
+        log('⚠️', 'Error requesting DeviceMotion permission', error)
+        this.startSimulated()
+        return
+      }
+    }
+
+    // 监听devicemotion事件
+    this.webMotionHandler = (event) => {
+      const dataPoint = {
+        timestamp: Date.now(),
+        acceleration: event.acceleration ? {
+          x: event.acceleration.x,
+          y: event.acceleration.y,
+          z: event.acceleration.z
+        } : null,
+        accelerationIncludingGravity: event.accelerationIncludingGravity ? {
+          x: event.accelerationIncludingGravity.x,
+          y: event.accelerationIncludingGravity.y,
+          z: event.accelerationIncludingGravity.z
+        } : null,
+        rotationRate: event.rotationRate ? {
+          alpha: event.rotationRate.alpha,
+          beta: event.rotationRate.beta,
+          gamma: event.rotationRate.gamma
+        } : null,
+        interval: event.interval
+      }
+
+      this.data.push(dataPoint)
+      
+      // 限制数据点数量，避免内存溢出
+      if (this.data.length > this.maxDataPoints) {
+        this.data.shift()
+      }
+
+      // 定期打印日志（每100个数据点）
+      if (this.data.length % 100 === 0) {
+        log('📊', `IMU data collected: ${this.data.length} points`)
+      }
+    }
+
+    window.addEventListener('devicemotion', this.webMotionHandler)
+    log('✅', 'Web DeviceMotion listener added')
+  }
+
+  /**
+   * 启动模拟数据（用于不支持DeviceMotion的浏览器）
+   */
+  startSimulated() {
+    log('🎭', 'Starting simulated IMU data for testing...')
+    
+    // 创建一个定时器来生成模拟数据
+    this.listener = setInterval(() => {
+      const dataPoint = {
+        timestamp: Date.now(),
+        acceleration: {
+          x: (Math.random() - 0.5) * 0.1,
+          y: (Math.random() - 0.5) * 0.1,
+          z: 9.8 + (Math.random() - 0.5) * 0.2
+        },
+        accelerationIncludingGravity: {
+          x: (Math.random() - 0.5) * 0.5,
+          y: (Math.random() - 0.5) * 0.5,
+          z: 9.8 + (Math.random() - 0.5) * 0.5
+        },
+        rotationRate: {
+          alpha: (Math.random() - 0.5) * 2,
+          beta: (Math.random() - 0.5) * 2,
+          gamma: (Math.random() - 0.5) * 2
+        },
+        interval: 100
+      }
+
+      this.data.push(dataPoint)
+      
+      // 限制数据点数量
+      if (this.data.length > this.maxDataPoints) {
+        this.data.shift()
+      }
+
+      // 定期打印日志（每50个数据点）
+      if (this.data.length % 50 === 0) {
+        log('📊', `Simulated IMU data collected: ${this.data.length} points`)
+      }
+    }, 100) // 每100ms生成一个数据点
   }
 
   async stop() {
@@ -83,9 +217,24 @@ class IMUSensorManager {
     try {
       log('🛑', 'Stopping IMU sensors...')
       
-      if (this.listener) {
-        await this.listener.remove()
-        this.listener = null
+      if (isNative()) {
+        // 停止原生平台的监听器
+        if (this.listener) {
+          await this.listener.remove()
+          this.listener = null
+        }
+      } else {
+        // 停止Web平台的监听器
+        if (this.webMotionHandler && typeof window !== 'undefined') {
+          window.removeEventListener('devicemotion', this.webMotionHandler)
+          this.webMotionHandler = null
+        }
+        
+        // 如果使用的是模拟数据，清除定时器
+        if (this.listener && typeof this.listener === 'number') {
+          clearInterval(this.listener)
+          this.listener = null
+        }
       }
 
       this.isActive = false
@@ -195,17 +344,43 @@ class CameraStreamManager {
    */
   async requestPermissions() {
     try {
-      log('🔐', 'Requesting camera permissions...')
-      const permissions = await Camera.checkPermissions()
+      log('🔐', `Requesting camera permissions on ${platform}...`)
       
-      if (permissions.camera !== 'granted' || permissions.photos !== 'granted') {
-        const result = await Camera.requestPermissions()
-        log('✅', 'Camera permissions result', result)
-        return result
+      if (isNative()) {
+        // 原生平台使用Capacitor Camera API
+        const permissions = await Camera.checkPermissions()
+        
+        if (permissions.camera !== 'granted' || permissions.photos !== 'granted') {
+          const result = await Camera.requestPermissions()
+          log('✅', 'Camera permissions result', result)
+          return result
+        }
+        
+        log('✅', 'Camera permissions already granted')
+        return permissions
+      } else {
+        // Web平台：检查浏览器的MediaDevices API
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          log('⚠️', 'Camera API not supported in this browser')
+          return { camera: 'denied', photos: 'denied' }
+        }
+        
+        try {
+          // 请求摄像头权限（通过尝试访问）
+          const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'environment' } 
+          })
+          
+          // 立即停止流，我们只是测试权限
+          stream.getTracks().forEach(track => track.stop())
+          
+          log('✅', 'Camera permissions granted on web')
+          return { camera: 'granted', photos: 'granted' }
+        } catch (error) {
+          log('⚠️', 'Camera permissions denied on web', error)
+          return { camera: 'denied', photos: 'denied' }
+        }
       }
-      
-      log('✅', 'Camera permissions already granted')
-      return permissions
     } catch (error) {
       log('❌', 'Failed to get camera permissions', error)
       throw error
@@ -405,6 +580,7 @@ export class SensorManager {
     try {
       log('🚀', '='.repeat(60))
       log('🚀', 'Starting all sensors...')
+      log('📱', `Platform: ${platform} (${isNative() ? 'Native' : 'Web'})`)
       log('🚀', '='.repeat(60))
       
       // 启动IMU传感器
@@ -427,6 +603,8 @@ export class SensorManager {
       
       return {
         success: true,
+        platform: platform,
+        isNative: isNative(),
         sensors: {
           imu: true,
           camera: true,
