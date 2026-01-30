@@ -10,6 +10,8 @@ import logging
 import os
 import httpx
 import json
+import asyncio
+from functools import wraps
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -58,6 +60,15 @@ CORS(app)  # Enable CORS for frontend communication
 
 # Store for meeting data (in production, use a database)
 meetings_db = {}
+
+
+def async_route(f):
+    """Decorator to handle async routes in Flask"""
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        return asyncio.run(f(*args, **kwargs))
+    return wrapper
+
 
 async def call_llm(messages: List[Dict[str, str]], temperature: float = 0.7) -> str:
     """
@@ -297,6 +308,7 @@ def extract_keyframes():
 
 
 @app.route('/api/v1/meetings/<meeting_id>/summary', methods=['GET'])
+@async_route
 async def get_meeting_summary(meeting_id: str):
     """
     获取会议的AI生成摘要
@@ -397,6 +409,7 @@ async def get_meeting_summary(meeting_id: str):
 
 
 @app.route('/api/v1/test-llm', methods=['POST'])
+@async_route
 async def test_llm():
     """
     测试 LLM API 连接
