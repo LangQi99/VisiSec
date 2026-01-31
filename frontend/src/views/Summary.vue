@@ -5,11 +5,11 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        <span>Back to Timeline</span>
+        <span>{{ t('summary.backToTimeline') }}</span>
       </router-link>
       
-      <h1 class="text-4xl font-serif font-bold text-ink mb-2">Meeting Summary</h1>
-      <p class="text-gray-600">AI-generated insights and action items</p>
+      <h1 class="text-4xl font-serif font-bold text-ink mb-2">{{ t('summary.title') }}</h1>
+      <p class="text-gray-600">{{ t('summary.subtitle') }}</p>
     </div>
 
     <!-- Meeting Overview -->
@@ -17,21 +17,21 @@
       <h2 class="text-2xl font-serif font-bold text-ink mb-4">Product Strategy Meeting</h2>
       <div class="grid grid-cols-3 gap-6 mb-6">
         <div>
-          <div class="text-sm text-gray-500 mb-1">Date</div>
+          <div class="text-sm text-gray-500 mb-1">{{ t('summary.overview.date') }}</div>
           <div class="font-medium">January 30, 2026</div>
         </div>
         <div>
-          <div class="text-sm text-gray-500 mb-1">Duration</div>
+          <div class="text-sm text-gray-500 mb-1">{{ t('summary.overview.duration') }}</div>
           <div class="font-medium">45 minutes</div>
         </div>
         <div>
-          <div class="text-sm text-gray-500 mb-1">Participants</div>
+          <div class="text-sm text-gray-500 mb-1">{{ t('summary.overview.participants') }}</div>
           <div class="font-medium">5 people</div>
         </div>
       </div>
       
       <div class="bg-terracotta/5 border border-terracotta/20 rounded-xl p-4">
-        <h3 class="font-semibold text-ink mb-2">Executive Summary</h3>
+        <h3 class="font-semibold text-ink mb-2">{{ t('summary.overview.executiveSummary') }}</h3>
         <p class="text-gray-700">
           The team reviewed Q4 product roadmap, discussed budget allocations for new features, 
           and finalized the marketing strategy for the upcoming launch. Key decisions were made 
@@ -43,12 +43,12 @@
     <!-- Action Items -->
     <div class="card mb-8">
       <div class="flex items-center justify-between mb-6">
-        <h3 class="text-2xl font-serif font-bold text-ink">Action Items</h3>
+        <h3 class="text-2xl font-serif font-bold text-ink">{{ t('summary.actionItems.title') }}</h3>
         <button class="btn-secondary text-sm">
           <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          Add to Calendar
+          {{ t('summary.actionItems.addToCalendar') }}
         </button>
       </div>
       
@@ -93,12 +93,12 @@
     <!-- Full Transcript -->
     <div class="card mb-8">
       <div class="flex items-center justify-between mb-6">
-        <h3 class="text-2xl font-serif font-bold text-ink">Transcript</h3>
+        <h3 class="text-2xl font-serif font-bold text-ink">{{ t('summary.transcript.title') }}</h3>
         <button class="btn-secondary text-sm">
           <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
-          Download
+          {{ t('summary.transcript.download') }}
         </button>
       </div>
       
@@ -121,7 +121,7 @@
 
     <!-- Extracted Images -->
     <div class="card">
-      <h3 class="text-2xl font-serif font-bold text-ink mb-6">Key Visuals & OCR</h3>
+      <h3 class="text-2xl font-serif font-bold text-ink mb-6">{{ t('summary.visuals.title') }}</h3>
       
       <div class="grid grid-cols-2 gap-6">
         <div 
@@ -146,7 +146,9 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const actionItems = ref([
   {
     title: 'Finalize feature specifications',

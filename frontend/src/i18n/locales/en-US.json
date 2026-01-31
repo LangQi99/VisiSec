@@ -28,6 +28,23 @@
         "title": "Intelligent Analysis",
         "description": "AI-driven attention tracking and automatic action item extraction"
       }
+    },
+    "mock": {
+      "meeting1": {
+        "title": "Product Strategy Meeting",
+        "time": "2 hours ago · 45 minutes"
+      },
+      "meeting2": {
+        "title": "Design Review",
+        "time": "Yesterday · 1 hour 20 minutes"
+      }
+    },
+    "messages": {
+      "connectionSuccess": "Backend connection successful! Version: {version}",
+      "connectionFailed": "Cannot connect to backend server. Please ensure backend is running on port 5124.",
+      "llmConfigured": "LLM Configured",
+      "llmNotConfigured": "LLM Not Configured",
+      "llmStatus": "LLM Status: {status}"
     }
   },
   "auth": {
@@ -95,5 +112,72 @@
     "success": "Success",
     "error": "Error",
     "loading": "Loading..."
+  },
+  "record": {
+    "backToHome": "Back to Home",
+    "title": "Record Meeting",
+    "subtitle": "Capture audio, video, and context for intelligent analysis",
+    "status": {
+      "recording": "Recording in progress",
+      "ready": "Ready to record"
+    },
+    "sensors": {
+      "audio": "Audio",
+      "frontCamera": "Front Camera",
+      "rearCamera": "Rear Camera",
+      "imu": "IMU Sensors",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "info": {
+      "titleLabel": "Meeting Title",
+      "titlePlaceholder": "e.g., Product Strategy Meeting",
+      "notesLabel": "Notes (Optional)",
+      "notesPlaceholder": "Add any notes about this meeting..."
+    },
+    "actions": {
+      "start": "Start Recording",
+      "stop": "Stop Recording",
+      "pause": "Pause",
+      "resume": "Resume"
+    }
+  },
+  "summary": {
+    "backToTimeline": "Back to Timeline",
+    "title": "Meeting Summary",
+    "subtitle": "AI-generated insights and action items",
+    "overview": {
+      "date": "Date",
+      "duration": "Duration",
+      "participants": "Participants",
+      "executiveSummary": "Executive Summary"
+    },
+    "actionItems": {
+      "title": "Action Items",
+      "addToCalendar": "Add to Calendar"
+    },
+    "transcript": {
+      "title": "Transcript",
+      "download": "Download"
+    },
+    "visuals": {
+      "title": "Key Visuals & OCR"
+    }
+  },
+  "timeline": {
+    "backToHome": "Back to Home",
+    "title": "Meeting Timeline",
+    "subtitle": "Visual heatmap of attention and key moments",
+    "viewSummary": "View Summary",
+    "export": "Export",
+    "share": "Share",
+    "heatmap": "Attention Heatmap",
+    "keyMoments": "Key Moments",
+    "attention": {
+      "high": "High Attention",
+      "medium": "Medium Attention",
+      "low": "Low Attention",
+      "keyMoment": "Key Moment"
+    }
   }
 }

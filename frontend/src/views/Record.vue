@@ -5,16 +5,16 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        <span>返回首页</span>
+        <span>{{ t('record.backToHome') }}</span>
       </router-link>
     </div>
 
     <div class="card">
       <!-- Header -->
       <div class="text-center mb-8">
-        <h1 class="text-4xl font-serif font-bold text-ink mb-4">录制会议</h1>
+        <h1 class="text-4xl font-serif font-bold text-ink mb-4">{{ t('record.title') }}</h1>
         <p class="text-gray-600">
-          捕捉音频、视频和上下文，进行智能分析
+          {{ t('record.subtitle') }}
         </p>
       </div>
 
@@ -37,7 +37,7 @@
           {{ formattedTime }}
         </div>
         <div class="text-gray-500">
-          {{ isRecording ? '正在录制中' : '准备录制' }}
+          {{ isRecording ? t('record.status.recording') : t('record.status.ready') }}
         </div>
       </div>
 
@@ -50,9 +50,9 @@
           <svg class="w-8 h-8 mx-auto mb-2" :class="sensorStatus.audio ? 'text-green-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
           </svg>
-          <div class="text-sm font-medium" :class="sensorStatus.audio ? 'text-green-900' : 'text-gray-600'">音频</div>
+          <div class="text-sm font-medium" :class="sensorStatus.audio ? 'text-green-900' : 'text-gray-600'">{{ t('record.sensors.audio') }}</div>
           <div class="text-xs" :class="sensorStatus.audio ? 'text-green-600' : 'text-gray-400'">
-            {{ sensorStatus.audio ? '已激活' : '未激活' }}
+            {{ sensorStatus.audio ? t('record.sensors.active') : t('record.sensors.inactive') }}
           </div>
         </div>
 
@@ -64,9 +64,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
-          <div class="text-sm font-medium" :class="sensorStatus.camera ? 'text-green-900' : 'text-gray-600'">前置摄像头</div>
+          <div class="text-sm font-medium" :class="sensorStatus.camera ? 'text-green-900' : 'text-gray-600'">{{ t('record.sensors.frontCamera') }}</div>
           <div class="text-xs" :class="sensorStatus.camera ? 'text-green-600' : 'text-gray-400'">
-            {{ sensorStatus.camera ? '已激活' : '未激活' }}
+            {{ sensorStatus.camera ? t('record.sensors.active') : t('record.sensors.inactive') }}
           </div>
         </div>
 
@@ -78,9 +78,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <div class="text-sm font-medium" :class="sensorStatus.camera ? 'text-green-900' : 'text-gray-600'">后置摄像头</div>
+          <div class="text-sm font-medium" :class="sensorStatus.camera ? 'text-green-900' : 'text-gray-600'">{{ t('record.sensors.rearCamera') }}</div>
           <div class="text-xs" :class="sensorStatus.camera ? 'text-green-600' : 'text-gray-400'">
-            {{ sensorStatus.camera ? '已激活' : '未激活' }}
+            {{ sensorStatus.camera ? t('record.sensors.active') : t('record.sensors.inactive') }}
           </div>
         </div>
 
@@ -91,9 +91,9 @@
           <svg class="w-8 h-8 mx-auto mb-2" :class="sensorStatus.imu ? 'text-green-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
-          <div class="text-sm font-medium" :class="sensorStatus.imu ? 'text-green-900' : 'text-gray-600'">IMU传感器</div>
+          <div class="text-sm font-medium" :class="sensorStatus.imu ? 'text-green-900' : 'text-gray-600'">{{ t('record.sensors.imu') }}</div>
           <div class="text-xs" :class="sensorStatus.imu ? 'text-green-600' : 'text-gray-400'">
-            {{ sensorStatus.imu ? '已激活' : '未激活' }}
+            {{ sensorStatus.imu ? t('record.sensors.active') : t('record.sensors.inactive') }}
           </div>
         </div>
       </div>
@@ -101,22 +101,22 @@
       <!-- Meeting Info -->
       <div class="space-y-4 mb-8">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">会议标题</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('record.info.titleLabel') }}</label>
           <input 
             v-model="meetingTitle"
             type="text" 
             class="input-field w-full"
-            placeholder="例如：产品策略会议"
+            :placeholder="t('record.info.titlePlaceholder')"
           />
         </div>
         
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">备注（可选）</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('record.info.notesLabel') }}</label>
           <textarea 
             v-model="meetingNotes"
             class="input-field w-full"
             rows="3"
-            placeholder="添加关于此次会议的任何备注..."
+            :placeholder="t('record.info.notesPlaceholder')"
           ></textarea>
         </div>
       </div>
@@ -132,7 +132,7 @@
               : 'bg-ink hover:bg-gray-800 text-white'
           ]"
         >
-          {{ isRecording ? '停止录制' : '开始录制' }}
+          {{ isRecording ? t('record.actions.stop') : t('record.actions.start') }}
         </button>
         
         <button 
@@ -140,7 +140,7 @@
           @click="pauseRecording"
           class="px-8 py-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full font-semibold text-lg transition-all"
         >
-          {{ isPaused ? '继续' : '暂停' }}
+          {{ isPaused ? t('record.actions.resume') : t('record.actions.pause') }}
         </button>
       </div>
 
@@ -155,11 +155,13 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { analyzeAttention } from '../services/api'
 import { sensorManager } from '../services/sensors'
 import { edgeModelManager } from '../services/edgeModels'
 import { wsClient } from '../services/websocket'
 
+const { t } = useI18n()
 const router = useRouter()
 const isRecording = ref(false)
 const isPaused = ref(false)

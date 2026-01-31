@@ -28,6 +28,23 @@
         "title": "智能分析",
         "description": "AI驱动的注意力追踪和自动行动项提取"
       }
+    },
+    "mock": {
+      "meeting1": {
+        "title": "产品策略会议",
+        "time": "2小时前 · 45分钟"
+      },
+      "meeting2": {
+        "title": "设计评审",
+        "time": "昨天 · 1小时20分钟"
+      }
+    },
+    "messages": {
+      "connectionSuccess": "后端连接成功！版本: {version}",
+      "connectionFailed": "无法连接到后端服务器。请确保后端正在运行在端口5124。",
+      "llmConfigured": "已配置",
+      "llmNotConfigured": "未配置",
+      "llmStatus": "LLM配置状态: {status}"
     }
   },
   "auth": {
@@ -95,5 +112,72 @@
     "success": "成功",
     "error": "错误",
     "loading": "加载中..."
+  },
+  "record": {
+    "backToHome": "返回首页",
+    "title": "录制会议",
+    "subtitle": "捕捉音频、视频和上下文，进行智能分析",
+    "status": {
+      "recording": "正在录制中",
+      "ready": "准备录制"
+    },
+    "sensors": {
+      "audio": "音频",
+      "frontCamera": "前置摄像头",
+      "rearCamera": "后置摄像头",
+      "imu": "IMU传感器",
+      "active": "已激活",
+      "inactive": "未激活"
+    },
+    "info": {
+      "titleLabel": "会议标题",
+      "titlePlaceholder": "例如：产品策略会议",
+      "notesLabel": "备注（可选）",
+      "notesPlaceholder": "添加关于此次会议的任何备注..."
+    },
+    "actions": {
+      "start": "开始录制",
+      "stop": "停止录制",
+      "pause": "暂停",
+      "resume": "继续"
+    }
+  },
+  "summary": {
+    "backToTimeline": "返回时间线",
+    "title": "会议纪要",
+    "subtitle": "AI生成的见解和行动项",
+    "overview": {
+      "date": "日期",
+      "duration": "时长",
+      "participants": "参会人数",
+      "executiveSummary": "执行摘要"
+    },
+    "actionItems": {
+      "title": "行动项",
+      "addToCalendar": "添加到日历"
+    },
+    "transcript": {
+      "title": "文字记录",
+      "download": "下载"
+    },
+    "visuals": {
+      "title": "关键视觉内容 & OCR"
+    }
+  },
+  "timeline": {
+    "backToHome": "返回首页",
+    "title": "会议时间线",
+    "subtitle": "注意力和关键时刻的热力图",
+    "viewSummary": "查看纪要",
+    "export": "导出",
+    "share": "分享",
+    "heatmap": "注意力热力图",
+    "keyMoments": "关键时刻",
+    "attention": {
+      "high": "高关注度",
+      "medium": "中等关注度",
+      "low": "低关注度",
+      "keyMoment": "关键时刻"
+    }
   }
 }

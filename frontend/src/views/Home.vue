@@ -25,7 +25,7 @@
       <div v-if="connectionStatus" class="mt-4 p-4 rounded-lg inline-block" :class="connectionStatus.success ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'">
         <p class="font-medium">{{ connectionStatus.message }}</p>
         <p v-if="connectionStatus.llmConfigured !== undefined" class="text-sm mt-1">
-          LLM配置状态: {{ connectionStatus.llmConfigured ? '✅ 已配置' : '❌ 未配置' }}
+          {{ t('home.messages.llmStatus', { status: connectionStatus.llmConfigured ? t('home.messages.llmConfigured') : t('home.messages.llmNotConfigured') }) }}
         </p>
       </div>
     </div>
@@ -82,8 +82,8 @@
           <div class="flex items-center space-x-4">
             <div class="w-16 h-16 bg-gray-100 rounded-xl"></div>
             <div>
-              <h4 class="font-serif font-bold text-ink">产品策略会议</h4>
-              <p class="text-sm text-gray-500">2小时前 · 45分钟</p>
+              <h4 class="font-serif font-bold text-ink">{{ t('home.mock.meeting1.title') }}</h4>
+              <p class="text-sm text-gray-500">{{ t('home.mock.meeting1.time') }}</p>
             </div>
           </div>
           <div class="flex items-center space-x-2">
@@ -98,8 +98,8 @@
           <div class="flex items-center space-x-4">
             <div class="w-16 h-16 bg-gray-100 rounded-xl"></div>
             <div>
-              <h4 class="font-serif font-bold text-ink">设计评审</h4>
-              <p class="text-sm text-gray-500">昨天 · 1小时20分钟</p>
+              <h4 class="font-serif font-bold text-ink">{{ t('home.mock.meeting2.title') }}</h4>
+              <p class="text-sm text-gray-500">{{ t('home.mock.meeting2.time') }}</p>
             </div>
           </div>
           <div class="flex items-center space-x-2">
@@ -133,14 +133,14 @@ const testConnection = async () => {
     
     connectionStatus.value = {
       success: true,
-      message: `✅ 后端连接成功！版本: ${result.version}`,
+      message: t('home.messages.connectionSuccess', { version: result.version }),
       llmConfigured: result.llm_configured
     }
   } catch (error) {
     console.error('❌ Backend connection failed:', error)
     connectionStatus.value = {
       success: false,
-      message: '❌ 无法连接到后端服务器。请确保后端正在运行在端口5124。'
+      message: t('home.messages.connectionFailed')
     }
   }
 }

@@ -5,16 +5,16 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        <span>Back to Home</span>
+        <span>{{ t('timeline.backToHome') }}</span>
       </router-link>
       
       <div class="flex justify-between items-start">
         <div>
-          <h1 class="text-4xl font-serif font-bold text-ink mb-2">Meeting Timeline</h1>
-          <p class="text-gray-600">Visual heatmap of attention and key moments</p>
+          <h1 class="text-4xl font-serif font-bold text-ink mb-2">{{ t('timeline.title') }}</h1>
+          <p class="text-gray-600">{{ t('timeline.subtitle') }}</p>
         </div>
         <router-link :to="`/summary/${$route.params.id}`" class="btn-primary">
-          View Summary
+          {{ t('timeline.viewSummary') }}
         </router-link>
       </div>
     </div>
@@ -31,13 +31,13 @@
             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Export
+            {{ t('timeline.export') }}
           </button>
           <button class="btn-secondary text-sm">
             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
             </svg>
-            Share
+            {{ t('timeline.share') }}
           </button>
         </div>
       </div>
@@ -45,7 +45,7 @@
 
     <!-- Attention Heatmap -->
     <div class="card mb-8">
-      <h3 class="text-xl font-serif font-bold text-ink mb-4">Attention Heatmap</h3>
+      <h3 class="text-xl font-serif font-bold text-ink mb-4">{{ t('timeline.heatmap') }}</h3>
       <div class="relative">
         <!-- Timeline -->
         <div class="h-24 bg-gradient-to-r from-green-400 via-yellow-400 to-red-400 rounded-xl mb-4 relative overflow-hidden">
@@ -74,19 +74,19 @@
         <div class="flex items-center justify-center space-x-6 text-sm">
           <div class="flex items-center space-x-2">
             <div class="w-4 h-4 bg-green-400 rounded"></div>
-            <span class="text-gray-600">High Attention</span>
+            <span class="text-gray-600">{{ t('timeline.attention.high') }}</span>
           </div>
           <div class="flex items-center space-x-2">
             <div class="w-4 h-4 bg-yellow-400 rounded"></div>
-            <span class="text-gray-600">Medium</span>
+            <span class="text-gray-600">{{ t('timeline.attention.medium') }}</span>
           </div>
           <div class="flex items-center space-x-2">
             <div class="w-4 h-4 bg-red-400 rounded"></div>
-            <span class="text-gray-600">Low Attention</span>
+            <span class="text-gray-600">{{ t('timeline.attention.low') }}</span>
           </div>
           <div class="flex items-center space-x-2">
             <div class="w-4 h-4 bg-white rounded border-2 border-ink"></div>
-            <span class="text-gray-600">Key Moment</span>
+            <span class="text-gray-600">{{ t('timeline.attention.keyMoment') }}</span>
           </div>
         </div>
       </div>
@@ -94,7 +94,7 @@
 
     <!-- Key Moments -->
     <div class="card">
-      <h3 class="text-xl font-serif font-bold text-ink mb-6">Key Moments</h3>
+      <h3 class="text-xl font-serif font-bold text-ink mb-6">{{ t('timeline.keyMoments') }}</h3>
       
       <div class="space-y-6">
         <div 
@@ -123,7 +123,7 @@
                 moment.attention === 'medium' ? 'bg-yellow-100 text-yellow-700' :
                 'bg-red-100 text-red-700'
               ]">
-                {{ moment.attention.charAt(0).toUpperCase() + moment.attention.slice(1) }} Attention
+                {{ t(`timeline.attention.${moment.attention}`) }}
               </span>
             </div>
             
@@ -151,7 +151,9 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const keyMoments = ref([
   {
     time: 5,
