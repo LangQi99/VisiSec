@@ -1,0 +1,99 @@
+{
+  "nav": {
+    "home": "首页",
+    "record": "录制会议",
+    "login": "登录",
+    "logout": "登出",
+    "settings": "设置",
+    "changePassword": "修改密码"
+  },
+  "home": {
+    "title": "视界秘书",
+    "subtitle": "您的智能会议助手",
+    "description": "通过多模态感知技术，捕捉、分析，永不错过任何重要时刻",
+    "startRecording": "开始录制",
+    "testConnection": "测试连接",
+    "recentMeetings": "最近的会议",
+    "viewAll": "查看全部",
+    "features": {
+      "vision": {
+        "title": "视觉捕捉",
+        "description": "双摄像头流捕捉演示内容和您的注意力模式"
+      },
+      "audio": {
+        "title": "音频录制",
+        "description": "高保真音频捕捉，智能转录和说话人检测"
+      },
+      "analysis": {
+        "title": "智能分析",
+        "description": "AI驱动的注意力追踪和自动行动项提取"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "登录",
+      "subtitle": "欢迎回来",
+      "username": "用户名",
+      "password": "密码",
+      "submit": "登录",
+      "noAccount": "还没有账户？",
+      "register": "注册",
+      "usernamePlaceholder": "请输入用户名",
+      "passwordPlaceholder": "请输入密码"
+    },
+    "register": {
+      "title": "注册",
+      "subtitle": "创建新账户",
+      "username": "用户名",
+      "password": "密码",
+      "confirmPassword": "确认密码",
+      "submit": "注册",
+      "hasAccount": "已有账户？",
+      "login": "登录",
+      "usernamePlaceholder": "请输入用户名",
+      "passwordPlaceholder": "请输入密码",
+      "confirmPasswordPlaceholder": "请再次输入密码"
+    },
+    "errors": {
+      "usernameRequired": "请输入用户名",
+      "passwordRequired": "请输入密码",
+      "passwordMismatch": "两次输入的密码不一致",
+      "loginFailed": "登录失败，请检查用户名和密码",
+      "registerFailed": "注册失败",
+      "usernameExists": "用户名已存在",
+      "changePasswordFailed": "修改密码失败"
+    }
+  },
+  "settings": {
+    "title": "设置",
+    "language": "语言",
+    "languageDescription": "选择界面语言",
+    "changePassword": "修改密码",
+    "currentPassword": "当前密码",
+    "newPassword": "新密码",
+    "confirmPassword": "确认新密码",
+    "submit": "提交",
+    "cancel": "取消",
+    "currentPasswordPlaceholder": "请输入当前密码",
+    "newPasswordPlaceholder": "请输入新密码",
+    "confirmPasswordPlaceholder": "请再次输入新密码",
+    "passwordChanged": "密码修改成功",
+    "languageChanged": "语言已切换"
+  },
+  "status": {
+    "processed": "已处理",
+    "processing": "处理中",
+    "pending": "待处理"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "confirm": "确认",
+    "success": "成功",
+    "error": "错误",
+    "loading": "加载中..."
+  }
+}

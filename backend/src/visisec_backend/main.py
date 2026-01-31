@@ -14,8 +14,10 @@ import json
 import asyncio
 from functools import wraps
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
+import jwt
+import bcrypt as bcrypt_lib
 
 # Load environment variables
 load_dotenv()
@@ -43,6 +45,9 @@ SILICON_FLOW_API_URL = os.getenv('SILICON_FLOW_API_URL', 'https://api.siliconflo
 FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
 FLASK_PORT = int(os.getenv('FLASK_PORT', '5124'))
 FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+JWT_SECRET = os.getenv('JWT_SECRET', 'visisec-secret-key-change-in-production')
+JWT_ALGORITHM = 'HS256'
+JWT_EXPIRATION_HOURS = 24
 
 # Log critical configuration
 logger.info(f"Silicon Flow API URL: {SILICON_FLOW_API_URL}")
@@ -57,6 +62,10 @@ logger.info("="*80)
 if not SILICON_FLOW_API_KEY:
     logger.warning("⚠️  WARNING: SILICON_FLOW_API_KEY is not set! LLM功能将不可用!")
     logger.warning("⚠️  Please set it in .env file")
+
+if JWT_SECRET == 'visisec-secret-key-change-in-production':
+    logger.warning("⚠️  WARNING: Using default JWT_SECRET! This is insecure in production!")
+    logger.warning("⚠️  Please set JWT_SECRET in .env file for production use")
 
 app = Flask(__name__)
 # CORS middleware for frontend communication
@@ -77,6 +86,11 @@ socketio = SocketIO(
 meetings_db = {}
 active_sessions = {}  # Track active WebSocket sessions
 
+# User database (in production, use a real database)
+# TODO: Replace with persistent database (e.g., PostgreSQL, MongoDB) for production
+# In-memory storage will lose all data on restart and doesn't support multi-instance deployments
+users_db = {}
+
 # Configuration constants
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 100 * 1024 * 1024))  # 100MB default
 MAX_PROMPT_LENGTH = int(os.getenv('MAX_PROMPT_LENGTH', 2000))  # 2000 chars default
@@ -87,6 +101,45 @@ def async_route(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         return asyncio.run(f(*args, **kwargs))
+    return wrapper
+
+
+def create_jwt_token(username: str) -> str:
+    """Create JWT token for user"""
+    payload = {
+        'username': username,
+        'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS),
+        'iat': datetime.utcnow()
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def verify_jwt_token(token: str) -> Dict[str, Any]:
+    """Verify JWT token and return payload"""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise ValueError("Token has expired")
+    except jwt.InvalidTokenError:
+        raise ValueError("Invalid token")
+
+
+def require_auth(f):
+    """Decorator to require authentication"""
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({"error": "No authorization token provided"}), 401
+        
+        token = auth_header.split(' ')[1]
+        try:
+            payload = verify_jwt_token(token)
+            request.user = payload
+            return f(*args, **kwargs)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 401
     return wrapper
 
 
@@ -156,6 +209,181 @@ def root():
         "llm_configured": bool(SILICON_FLOW_API_KEY),
         "timestamp": datetime.now().isoformat()
     })
+
+
+# ============================================================================
+# Authentication Endpoints
+# ============================================================================
+
+@app.route('/api/v1/auth/register', methods=['POST'])
+def register():
+    """用户注册"""
+    try:
+        logger.info("="*60)
+        logger.info("📝 Registration request received")
+        
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        
+        # Validation
+        if not username or not password:
+            logger.warning("❌ Missing username or password")
+            return jsonify({"error": "Username and password are required"}), 400
+        
+        if len(username) < 3:
+            logger.warning("❌ Username too short")
+            return jsonify({"error": "Username must be at least 3 characters"}), 400
+        
+        if len(password) < 6:
+            logger.warning("❌ Password too short")
+            return jsonify({"error": "Password must be at least 6 characters"}), 400
+        
+        # Check if user exists
+        if username in users_db:
+            logger.warning(f"❌ Username already exists: {username}")
+            return jsonify({"error": "Username already exists"}), 409
+        
+        # Hash password and create user
+        hashed_password = bcrypt_lib.hashpw(password.encode('utf-8'), bcrypt_lib.gensalt()).decode('utf-8')
+        users_db[username] = {
+            'username': username,
+            'password': hashed_password,
+            'created_at': datetime.now().isoformat()
+        }
+        
+        # Create JWT token
+        token = create_jwt_token(username)
+        
+        logger.info(f"✅ User registered successfully: {username}")
+        logger.info("="*60)
+        
+        return jsonify({
+            "status": "success",
+            "message": "User registered successfully",
+            "token": token,
+            "user": {
+                "username": username
+            }
+        }), 201
+        
+    except Exception as e:
+        logger.error(f"❌ Error during registration: {str(e)}", exc_info=True)
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@app.route('/api/v1/auth/login', methods=['POST'])
+def login():
+    """用户登录"""
+    try:
+        logger.info("="*60)
+        logger.info("🔐 Login request received")
+        
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        
+        # Validation
+        if not username or not password:
+            logger.warning("❌ Missing username or password")
+            return jsonify({"error": "Username and password are required"}), 400
+        
+        # Check if user exists
+        if username not in users_db:
+            logger.warning(f"❌ User not found: {username}")
+            return jsonify({"error": "Invalid username or password"}), 401
+        
+        user = users_db[username]
+        
+        # Verify password
+        if not bcrypt_lib.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+            logger.warning(f"❌ Invalid password for user: {username}")
+            return jsonify({"error": "Invalid username or password"}), 401
+        
+        # Create JWT token
+        token = create_jwt_token(username)
+        
+        logger.info(f"✅ User logged in successfully: {username}")
+        logger.info("="*60)
+        
+        return jsonify({
+            "status": "success",
+            "message": "Login successful",
+            "token": token,
+            "user": {
+                "username": username
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error during login: {str(e)}", exc_info=True)
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@app.route('/api/v1/auth/me', methods=['GET'])
+@require_auth
+def get_current_user():
+    """获取当前用户信息"""
+    username = request.user['username']
+    
+    if username not in users_db:
+        return jsonify({"error": "User not found"}), 404
+    
+    return jsonify({
+        "username": username,
+        "created_at": users_db[username].get('created_at')
+    })
+
+
+@app.route('/api/v1/auth/change-password', methods=['POST'])
+@require_auth
+def change_password():
+    """修改密码"""
+    try:
+        logger.info("="*60)
+        logger.info("🔑 Password change request received")
+        
+        username = request.user['username']
+        data = request.get_json()
+        current_password = data.get('currentPassword', '')
+        new_password = data.get('newPassword', '')
+        
+        # Validation
+        if not current_password or not new_password:
+            logger.warning("❌ Missing current or new password")
+            return jsonify({"error": "Current password and new password are required"}), 400
+        
+        if len(new_password) < 6:
+            logger.warning("❌ New password too short")
+            return jsonify({"error": "New password must be at least 6 characters"}), 400
+        
+        # Check if user exists
+        if username not in users_db:
+            logger.warning(f"❌ User not found: {username}")
+            return jsonify({"error": "User not found"}), 404
+        
+        user = users_db[username]
+        
+        # Verify current password
+        if not bcrypt_lib.checkpw(current_password.encode('utf-8'), user['password'].encode('utf-8')):
+            logger.warning(f"❌ Invalid current password for user: {username}")
+            return jsonify({"error": "Current password is incorrect"}), 401
+        
+        # Hash and update new password
+        hashed_password = bcrypt_lib.hashpw(new_password.encode('utf-8'), bcrypt_lib.gensalt()).decode('utf-8')
+        users_db[username]['password'] = hashed_password
+        
+        logger.info(f"✅ Password changed successfully for user: {username}")
+        logger.info("="*60)
+        
+        return jsonify({
+            "status": "success",
+            "message": "Password changed successfully"
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error changing password: {str(e)}", exc_info=True)
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @app.route('/api/v1/upload/audio', methods=['POST'])
