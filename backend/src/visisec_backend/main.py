@@ -76,7 +76,7 @@ CORS(app, origins=allowed_origins)
 # Initialize SocketIO for WebSocket support
 socketio = SocketIO(
     app,
-    cors_allowed_origins=allowed_origins,
+    cors_allowed_origins="*",  # Allow all origins as requested
     async_mode='threading',
     logger=True,
     engineio_logger=True
