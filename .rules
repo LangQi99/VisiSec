@@ -1,0 +1,78 @@
+#### 1. 产品概述
+android app+Capacitor+uv(python)+vue+mutiagent自主决策循环流
+**VisiSec - 视界秘书** 是一款融合多模态感知（听觉+视觉+行为）的智能会议助理。旨在通过捕捉用户的视觉关注点和设备交互行为，解决传统录音笔“信息过载”和“上下文缺失”的问题。
+
+#### 2. 多模态输入层 (Sensor Fusion)
+
+* **视觉（Visual）：**
+* **后置流：** 捕捉会议/课程现场（PPT/白板），用于内容分析。或者线上会议手机内录
+* **前置流：** 捕捉用户面部/眼部，用于注意力分析。
+
+
+* **听觉（Audio）：** 全程高保真录音。
+* **环境/行为（Context）：**
+* **IMU数据：** 陀螺仪与加速度计辅助判断设备姿态。
+* **应用状态：** 监控前台应用包名（检测是否切换至非生产力应用）。
+
+
+
+#### 3. 核心处理流程 (Workflow)
+
+* **端侧计算 (Edge Computing)：**
+* **画面变更检测：** 分析后置视频流  判定PPT翻页/板书新增  触发关键帧提取。
+* **注意力加权：** 结合前置视线追踪与应用状态  判定用户专注度（High/Low）。
+
+
+* **云端处理 (Cloud Processing)：**
+* **视听对齐：** 将音频流、文本转录与视觉关键帧按时间戳对齐。
+
+
+
+#### 4. 交付与行动 (Deliverables)
+
+* **可视化时间轴：** 生成会议热力图。
+* *红色区间：* 标记为“低关注/走神”（如低头、刷手机）。
+* *高亮节点：* 标记PPT翻页及对应的重点音频片段。
+
+
+* **任务自动化：** NLP语义分析提取 Action Item（时间、事件、责任人）  调用系统API写入日历/Reminders  附带关键帧作为证据/参考。
+
+前端要求：
+
+Context: I am building a Vue 3 application and I want to implement a specific UI design system.
+
+Design Style: "Modern Editorial" and "Warm Humanist". The look should feel like a high-end printed magazine—intellectual, calm, and trustworthy.
+
+Please use the following specific visual guidelines for the CSS/Tailwind classes:
+
+Color Palette:
+
+Background: Do NOT use pure white. Use a warm, paper-like off-white (e.g., #FBF9F6 or Tailwind bg-stone-50 / bg-orange-50/10).
+
+Text: High contrast. Use nearly pure black (e.g., #1A1A1A) for headings and dark gray for body text.
+
+Accents: Use earthy tones sparingly (e.g., burnt orange or terracotta) for logos or subtle highlights.
+
+Typography (Crucial):
+
+Headings: Use a Serif font (like font-serif, Merriweather, or Tiempos). They should be large, elegant, and have tight letter spacing.
+
+Body: Use a clean, geometric Sans-serif font (like Inter or Helvetica) for readability.
+
+UI Components:
+
+Buttons: "Pill-shaped" or high-radius rounded corners.
+
+Primary Button: Solid black background, white text, fully rounded (rounded-full or rounded-lg), no borders.
+
+Secondary Button: White background, light gray border, black text.
+
+Inputs: Minimalist with lots of padding. White background inside the input, rounded corners (rounded-xl), and very subtle borders.
+
+Cards: Use a "soft card" style. White background on top of the beige page background, large rounded corners (e.g., rounded-3xl), and very minimal or no shadow.
+
+Icons & Graphics:
+
+Use Thin Line Art icons (outline style).
+
+Icons should feel geometric and abstract, not filled.
