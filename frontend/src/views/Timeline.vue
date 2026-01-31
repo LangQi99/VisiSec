@@ -139,7 +139,7 @@
               </div>
             </div>
             
-            <h4 class="font-serif font-bold text-ink mb-2">{{ moment.title }}</h4>
+            <h4 class="font-serif font-bold text-xl text-ink mb-2">{{ moment.title }}</h4>
             <p class="text-gray-600 text-sm mb-3" v-html="moment.description"></p>
             
             <!-- Audio snippet -->
