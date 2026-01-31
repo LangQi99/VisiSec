@@ -38,7 +38,7 @@
           </router-link>
 
           <!-- Logged in - show user menu -->
-          <div v-else class="relative">
+          <div v-else class="relative user-menu-container">
             <button
               @click="toggleMenu"
               class="flex items-center space-x-2 hover:opacity-80 transition-opacity"
@@ -121,7 +121,7 @@ const handleLogout = () => {
 
 // Close menu when clicking outside
 const handleClickOutside = (event) => {
-  if (showMenu.value && !event.target.closest('.relative')) {
+  if (showMenu.value && !event.target.closest('.user-menu-container')) {
     showMenu.value = false
   }
 }

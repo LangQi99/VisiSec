@@ -63,6 +63,10 @@ if not SILICON_FLOW_API_KEY:
     logger.warning("⚠️  WARNING: SILICON_FLOW_API_KEY is not set! LLM功能将不可用!")
     logger.warning("⚠️  Please set it in .env file")
 
+if JWT_SECRET == 'visisec-secret-key-change-in-production':
+    logger.warning("⚠️  WARNING: Using default JWT_SECRET! This is insecure in production!")
+    logger.warning("⚠️  Please set JWT_SECRET in .env file for production use")
+
 app = Flask(__name__)
 # CORS middleware for frontend communication
 # In production, restrict to specific origins
@@ -83,6 +87,8 @@ meetings_db = {}
 active_sessions = {}  # Track active WebSocket sessions
 
 # User database (in production, use a real database)
+# TODO: Replace with persistent database (e.g., PostgreSQL, MongoDB) for production
+# In-memory storage will lose all data on restart and doesn't support multi-instance deployments
 users_db = {}
 
 # Configuration constants
@@ -134,9 +140,6 @@ def require_auth(f):
             return f(*args, **kwargs)
         except ValueError as e:
             return jsonify({"error": str(e)}), 401
-    return wrapper
-    def wrapper(*args, **kwargs):
-        return asyncio.run(f(*args, **kwargs))
     return wrapper
 
 
