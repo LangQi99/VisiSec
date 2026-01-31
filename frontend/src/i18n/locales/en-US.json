@@ -169,6 +169,46 @@
     },
     "visuals": {
       "title": "Key Visuals & OCR"
+    },
+    "sample": {
+      "overview": {
+        "date": "January 31, 2026",
+        "duration": "90 minutes",
+        "participants": "35 people",
+        "content": "This session delved into core presentation delivery skills. The instructor focused on speaker posture (specifically the importance of equal weight distribution) and the appropriate context for using colloquial language. The session included an interactive Q&A. Finally, specific homework was assigned with an emphasis on targeted practice."
+      },
+      "actionItems": {
+        "1": {
+          "title": "Practice Posture",
+          "description": "Practice standing with equal weight distribution in front of a mirror for 5 minutes daily to build muscle memory."
+        },
+        "2": {
+          "title": "Complete Homework",
+          "description": "Complete exercises 3, 4, and 5 on page 42, focusing on colloquial transformation."
+        },
+        "3": {
+          "title": "Prepare Short Speech",
+          "description": "Prepare a 3-minute self-introduction using today's verbal techniques for the next class."
+        }
+      },
+      "transcript": {
+        "1": "Hello everyone, today's core topic is 'Presentation Delivery Skills'. Please look at the screen.",
+        "2": "Many students ask, what is the best stance? The key is to 'redistribute' your weight equally.",
+        "3": "Teacher, when should we use spoken language versus written language?",
+        "4": "Good question. Use spoken language when you need to close the distance with the audience or explain complex concepts.",
+        "5": "Finally, please write down today's homework. This part is very important.",
+        "6": "Please turn to page 42 and complete exercises 3 through 5. We will review them next week."
+      },
+      "speakers": {
+        "instructor": "Instructor",
+        "student": "Student A"
+      },
+      "visuals": {
+        "1": "Topic: Presentation Delivery Skills - Instructor Presenting",
+        "2": "Posture Analysis: Diagram of Weight Redistribution",
+        "3": "Verbal Strategy: When to Use Spoken Language",
+        "4": "Homework: Page 42, Exercises 3, 4, 5"
+      }
     }
   },
   "timeline": {
@@ -185,6 +225,28 @@
       "medium": "Medium Attention",
       "low": "Low Attention",
       "keyMoment": "Key Moment"
+    },
+    "sample": {
+      "meetingTitle": "Course: How to Present Correctly",
+      "meetingDate": "January 31, 2026 · 90 minutes",
+      "moments": {
+        "1": {
+          "title": "Course Opening: Core of Presentation",
+          "description": "Instructor introduced the core goal: mastering non-verbal skills. Key emphasis: 1. Body language accounts for 55%; 2. Tone and voice 38%; 3. Actual words only 7%. Your attention was highly focused, noting down the Mehrabian rule."
+        },
+        "2": {
+          "title": "Posture Deep Dive: Weight Distribution",
+          "description": "Instructor broke down the 'Redistribute Weight' stance into three key methods: 1. Grounding: Feet like tree roots; 2. Soft Knees: Flexible, not locked; 3. Centered Weight: Avoid leaning on one leg. System detected you noting 'Soft Knees', switching gaze between screen and notebook."
+        },
+        "3": {
+          "title": "Q&A: Colloquial Expressions",
+          "description": "Q&A on 'Colloquial Expressions'. Instructor listed conversion tips: 1. Short sentences over long ones; 2. Active voice over passive; 3. Use rhetorical questions. You checked your phone occasionally but noted 'Short sentences', maintaining overall follow-up."
+        },
+        "4": {
+          "title": "IMPORTANT: Homework Assignment",
+          "description": "Instructor assigning core homework: 1. Textbook Page 42, Exercises 3-5 (Focus on Ex. 5); 2. Record a 3-minute speech video; 3. Peer review. !ALERT! System detected very low attention (phone usage), you likely missed the 'Video Recording' requirement. Please re-watch to confirm deadline."
+        }
+      }
     }
   }
 }

@@ -23,8 +23,8 @@
     <div class="card mb-8">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h2 class="text-2xl font-serif font-bold text-ink">Product Strategy Meeting</h2>
-          <p class="text-gray-500">January 30, 2026 · 45 minutes</p>
+          <h2 class="text-2xl font-serif font-bold text-ink">{{ t('timeline.sample.meetingTitle') }}</h2>
+          <p class="text-gray-500">{{ t('timeline.sample.meetingDate') }}</p>
         </div>
         <div class="flex space-x-2">
           <button class="btn-secondary text-sm">
@@ -103,8 +103,11 @@
           class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pb-6 border-b border-gray-100 last:border-0"
         >
           <!-- Thumbnail -->
-          <div class="flex-shrink-0 w-full h-48 sm:w-48 sm:h-32 bg-gray-200 rounded-xl overflow-hidden">
-            <div class="w-full h-full flex items-center justify-center text-gray-400">
+          <div class="flex-shrink-0 w-full h-48 sm:w-48 sm:h-32 bg-gray-200 rounded-xl overflow-hidden relative group">
+            <template v-if="moment.image">
+              <img :src="moment.image" :alt="moment.title" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+            </template>
+            <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
               <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -150,38 +153,42 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-const keyMoments = ref([
+const keyMoments = computed(() => [
   {
     time: 5,
     duration: 45,
-    title: 'Project Overview Presentation',
-    description: 'Opening slide with Q4 roadmap overview. High engagement detected.',
-    attention: 'high'
+    title: t('timeline.sample.moments.1.title'),
+    description: t('timeline.sample.moments.1.description'),
+    attention: 'high',
+    image: '/mock/1.jpg'
   },
   {
     time: 12,
     duration: 32,
-    title: 'Budget Discussion',
-    description: 'Detailed financial breakdown. Medium attention with some device switching.',
-    attention: 'medium'
+    title: t('timeline.sample.moments.2.title'),
+    description: t('timeline.sample.moments.2.description'),
+    attention: 'medium',
+    image: '/mock/2.jpg'
   },
   {
     time: 25,
     duration: 28,
-    title: 'Marketing Strategy',
-    description: 'Low attention period - phone usage detected.',
-    attention: 'low'
+    title: t('timeline.sample.moments.3.title'),
+    description: t('timeline.sample.moments.3.description'),
+    attention: 'medium',
+    image: '/mock/3.jpg'
   },
   {
     time: 35,
     duration: 52,
-    title: 'Action Items & Next Steps',
-    description: 'Final summary with task assignments. High focus period.',
-    attention: 'high'
+    title: t('timeline.sample.moments.4.title'),
+    description: t('timeline.sample.moments.4.description'),
+    attention: 'low',
+    image: '/mock/4.jpg'
   }
 ])
 

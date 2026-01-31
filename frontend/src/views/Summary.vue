@@ -14,28 +14,26 @@
 
     <!-- Meeting Overview -->
     <div class="card mb-8">
-      <h2 class="text-2xl font-serif font-bold text-ink mb-4">Product Strategy Meeting</h2>
+      <h2 class="text-2xl font-serif font-bold text-ink mb-4">{{ t('timeline.sample.meetingTitle') }}</h2>
       <div class="grid grid-cols-3 gap-6 mb-6">
         <div>
           <div class="text-sm text-gray-500 mb-1">{{ t('summary.overview.date') }}</div>
-          <div class="font-medium">January 30, 2026</div>
+          <div class="font-medium">{{ t('summary.sample.overview.date') }}</div>
         </div>
         <div>
           <div class="text-sm text-gray-500 mb-1">{{ t('summary.overview.duration') }}</div>
-          <div class="font-medium">45 minutes</div>
+          <div class="font-medium">{{ t('summary.sample.overview.duration') }}</div>
         </div>
         <div>
           <div class="text-sm text-gray-500 mb-1">{{ t('summary.overview.participants') }}</div>
-          <div class="font-medium">5 people</div>
+          <div class="font-medium">{{ t('summary.sample.overview.participants') }}</div>
         </div>
       </div>
       
       <div class="bg-terracotta/5 border border-terracotta/20 rounded-xl p-4">
         <h3 class="font-semibold text-ink mb-2">{{ t('summary.overview.executiveSummary') }}</h3>
         <p class="text-gray-700">
-          The team reviewed Q4 product roadmap, discussed budget allocations for new features, 
-          and finalized the marketing strategy for the upcoming launch. Key decisions were made 
-          regarding feature prioritization and timeline adjustments.
+          {{ t('summary.sample.overview.content') }}
         </p>
       </div>
     </div>
@@ -112,8 +110,8 @@
             {{ line.time }}
           </div>
           <div class="flex-1">
-            <span class="font-medium text-ink">{{ line.speaker }}:</span>
-            <span class="text-gray-700"> {{ line.text }}</span>
+            <span class="font-bold text-ink mr-1">{{ line.speaker }}:</span>
+            <span class="text-gray-700">{{ line.text }}</span>
           </div>
         </div>
       </div>
@@ -129,10 +127,15 @@
           :key="index"
           class="border border-gray-200 rounded-xl overflow-hidden"
         >
-          <div class="aspect-video bg-gray-100 flex items-center justify-center">
-            <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+          <div class="aspect-video bg-gray-100 flex items-center justify-center relative overflow-hidden group">
+            <template v-if="image.image">
+              <img :src="image.image" :alt="image.ocrText" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+            </template>
+            <div v-else class="flex items-center justify-center w-full h-full">
+              <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
           </div>
           <div class="p-4 bg-white">
             <div class="text-xs text-gray-500 mb-2">{{ image.time }}</div>
@@ -145,47 +148,47 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-const actionItems = ref([
+const actionItems = computed(() => [
   {
-    title: 'Finalize feature specifications',
-    description: 'Complete detailed specs for Q4 features and share with engineering team',
+    title: t('summary.sample.actionItems.1.title'),
+    description: t('summary.sample.actionItems.1.description'),
     assignee: 'Sarah Chen',
     dueDate: 'Feb 5, 2026',
     timestamp: '12:34'
   },
   {
-    title: 'Review budget allocation',
-    description: 'Validate proposed budget distribution across teams',
+    title: t('summary.sample.actionItems.2.title'),
+    description: t('summary.sample.actionItems.2.description'),
     assignee: 'Michael Park',
     dueDate: 'Feb 3, 2026',
     timestamp: '23:15'
   },
   {
-    title: 'Update marketing timeline',
-    description: 'Adjust campaign dates based on new product launch schedule',
+    title: t('summary.sample.actionItems.3.title'),
+    description: t('summary.sample.actionItems.3.description'),
     assignee: 'Emily Rodriguez',
     dueDate: 'Feb 8, 2026',
     timestamp: '38:42'
   }
 ])
 
-const transcript = ref([
-  { time: '00:00', speaker: 'Sarah', text: 'Good morning everyone. Let\'s start with the Q4 roadmap overview.' },
-  { time: '00:15', speaker: 'Michael', text: 'Thanks Sarah. I\'ve prepared slides covering our key initiatives.' },
-  { time: '00:32', speaker: 'Sarah', text: 'Great. Can you walk us through the timeline?' },
-  { time: '01:05', speaker: 'Michael', text: 'Absolutely. We\'re targeting a late November launch for the core features.' },
-  { time: '01:28', speaker: 'Emily', text: 'That aligns well with our marketing calendar.' },
-  { time: '02:10', speaker: 'Sarah', text: 'Perfect. Let\'s discuss the budget implications next.' },
+const transcript = computed(() => [
+  { time: '00:00', speaker: t('summary.sample.speakers.instructor'), text: t('summary.sample.transcript.1') },
+  { time: '00:15', speaker: t('summary.sample.speakers.instructor'), text: t('summary.sample.transcript.2') },
+  { time: '00:32', speaker: t('summary.sample.speakers.student'), text: t('summary.sample.transcript.3') },
+  { time: '01:05', speaker: t('summary.sample.speakers.instructor'), text: t('summary.sample.transcript.4') },
+  { time: '01:28', speaker: t('summary.sample.speakers.instructor'), text: t('summary.sample.transcript.5') },
+  { time: '02:10', speaker: t('summary.sample.speakers.instructor'), text: t('summary.sample.transcript.6') },
 ])
 
-const extractedImages = ref([
-  { time: '05:30', ocrText: 'Q4 Product Roadmap - Feature Prioritization Matrix' },
-  { time: '12:45', ocrText: 'Budget Allocation: Engineering 45%, Marketing 30%, Operations 25%' },
-  { time: '25:20', ocrText: 'Marketing Strategy: Multi-channel campaign Q4 2026' },
-  { time: '35:15', ocrText: 'Action Items & Deliverables - Timeline Overview' },
+const extractedImages = computed(() => [
+  { time: '05:30', ocrText: t('summary.sample.visuals.1'), image: '/mock/1.jpg' },
+  { time: '12:45', ocrText: t('summary.sample.visuals.2'), image: '/mock/2.jpg' },
+  { time: '25:20', ocrText: t('summary.sample.visuals.3'), image: '/mock/3.jpg' },
+  { time: '35:15', ocrText: t('summary.sample.visuals.4'), image: '/mock/4.jpg' },
 ])
 </script>
