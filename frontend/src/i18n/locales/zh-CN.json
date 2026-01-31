@@ -140,6 +140,13 @@
       "stop": "停止录制",
       "pause": "暂停",
       "resume": "继续"
+    },
+    "meetingType": {
+      "title": "选择会议类型",
+      "online": "线上会议",
+      "onlineDesc": "内录音频 / 屏幕捕捉",
+      "offline": "线下会议",
+      "offlineDesc": "使用后置摄像头捕捉环境"
     }
   },
   "summary": {

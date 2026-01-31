@@ -140,6 +140,13 @@
       "stop": "Stop Recording",
       "pause": "Pause",
       "resume": "Resume"
+    },
+    "meetingType": {
+      "title": "Select Meeting Type",
+      "online": "Online Meeting",
+      "onlineDesc": "Internal audio / Screen capture",
+      "offline": "Offline Meeting",
+      "offlineDesc": "Use rear camera for context"
     }
   },
   "summary": {

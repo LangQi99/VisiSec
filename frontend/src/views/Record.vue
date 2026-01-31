@@ -149,6 +149,48 @@
         <p class="text-sm">{{ apiStatus.message }}</p>
       </div>
     </div>
+    
+    <!-- Meeting Type Selection Modal -->
+    <div v-if="showMeetingTypeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl">
+        <h2 class="text-2xl font-serif font-bold text-ink mb-6 text-center">{{ t('record.meetingType.title') }}</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <button 
+            @click="confirmMeetingType('OFFLINE')"
+            class="p-6 rounded-2xl border-2 border-transparent hover:border-terracotta bg-stone-50 hover:bg-orange-50 transition-all text-center group"
+          >
+            <div class="w-16 h-16 bg-white rounded-full mx-auto mb-4 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <svg class="w-8 h-8 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h3 class="font-bold text-lg mb-1">{{ t('record.meetingType.offline') }}</h3>
+            <p class="text-sm text-gray-500">{{ t('record.meetingType.offlineDesc') }}</p>
+          </button>
+          
+          <button 
+            @click="confirmMeetingType('ONLINE')"
+            class="p-6 rounded-2xl border-2 border-transparent hover:border-terracotta bg-stone-50 hover:bg-orange-50 transition-all text-center group"
+          >
+            <div class="w-16 h-16 bg-white rounded-full mx-auto mb-4 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <svg class="w-8 h-8 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 class="font-bold text-lg mb-1">{{ t('record.meetingType.online') }}</h3>
+            <p class="text-sm text-gray-500">{{ t('record.meetingType.onlineDesc') }}</p>
+          </button>
+        </div>
+        
+        <button 
+          @click="showMeetingTypeModal = false"
+          class="w-full py-3 text-gray-500 hover:text-gray-800 font-medium"
+        >
+          {{ t('common.cancel') }}
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -168,6 +210,8 @@ const isPaused = ref(false)
 const recordingTime = ref(0)
 const meetingTitle = ref('')
 const meetingNotes = ref('')
+const showMeetingTypeModal = ref(false)
+const meetingType = ref('OFFLINE') // 'ONLINE' | 'OFFLINE'
 const apiStatus = ref(null)
 const sensorStatus = ref({
   imu: false,
@@ -253,15 +297,38 @@ const startRecording = async () => {
     keyframeInterval = setInterval(async () => {
       if (!isPaused.value) {
         try {
-          // 捕获后置摄像头画面
-          const frame = await sensorManager.captureKeyframe('REAR')
           const sensorData = await sensorManager.collectAllData()
+          let frame = { base64: null } // Default empty frame
           
-          // 使用边缘模型处理
-          const analysis = await edgeModelManager.processFrame(
-            frame.base64,
-            sensorData
-          )
+          // Only capture rear camera if it's an OFFLINE meeting
+          if (meetingType.value === 'OFFLINE') {
+            // 捕获后置摄像头画面
+            frame = await sensorManager.captureKeyframe('REAR')
+          } else {
+             console.log('🌐 Online meeting: Skipping rear camera capture')
+             // For online meetings, we might want to still send sensor data but no visual frame,
+             // or maybe just skip the visual processing part.
+             // For now, let's just not capture the frame. 
+             // We still need to construct a "frame" object compatible with what edgeModelManager expects if we want to run analysis?
+             // Or we skip analysis too?
+             // Assuming we skip visual analysis if no frame.
+          }
+          
+          // 如果是线下会议有画面，进行边缘模型处理
+          // If offline meeting with frame, process it
+          let analysis = { isKeyframe: false }
+          
+          if (meetingType.value === 'OFFLINE' && frame.base64) {
+             // 使用边缘模型处理
+             analysis = await edgeModelManager.processFrame(
+              frame.base64,
+              sensorData
+            )
+          } else {
+             // For online meetings, maybe we just treat it as not a keyframe for now, 
+             // or we rely on audio/IMU only.
+             // Let's assume no visual keyframes for online mode for now.
+          }
           
           // 如果是关键帧，发送到服务器
           if (analysis.isKeyframe) {
@@ -273,7 +340,7 @@ const startRecording = async () => {
             console.log(`🖼️ Keyframe #${keyframeCount.value} sent to server`)
           }
         } catch (error) {
-          console.warn('⚠️ Keyframe capture failed:', error)
+          console.warn('⚠️ Keyframe capture/analysis failed:', error)
         }
       }
     }, 10000)
@@ -390,13 +457,23 @@ const cleanupRecording = async () => {
 }
 
 /**
+ * Confirm meeting type selection
+ */
+const confirmMeetingType = async (type) => {
+  meetingType.value = type
+  showMeetingTypeModal.value = false
+  await startRecording()
+}
+
+/**
  * 切换录制状态
  */
 const toggleRecording = async () => {
   if (isRecording.value) {
     await stopRecording()
   } else {
-    await startRecording()
+    // Show modal instead of starting directly
+    showMeetingTypeModal.value = true
   }
 }
 
