@@ -1,5 +1,14 @@
 {
   "appId": "com.visisec.app",
   "appName": "VisiSec",
-  "webDir": "dist"
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
 }

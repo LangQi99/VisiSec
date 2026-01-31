@@ -1,5 +1,15 @@
 <template>
-  <div class="max-w-4xl mx-auto py-8 px-4">
+  <div class="max-w-4xl mx-auto py-8 px-4" style="padding-top: env(safe-area-inset-top)">
+    <!-- Back Button -->
+    <div class="mb-4">
+      <router-link to="/" class="text-terracotta hover:underline flex items-center space-x-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span>{{ t('common.backToHome') }}</span>
+      </router-link>
+    </div>
+
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-4xl font-serif font-bold text-ink mb-2">

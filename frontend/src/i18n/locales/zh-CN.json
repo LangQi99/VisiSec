@@ -111,7 +111,8 @@
     "confirm": "确认",
     "success": "成功",
     "error": "错误",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "backToHome": "返回首页"
   },
   "record": {
     "backToHome": "返回首页",

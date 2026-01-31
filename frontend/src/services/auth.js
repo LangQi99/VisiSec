@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5124'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5124'
 
 // User state
 export const currentUser = ref(null)
@@ -10,7 +10,7 @@ export const isAuthenticated = ref(false)
 export function initAuth() {
   const token = localStorage.getItem('auth_token')
   const user = localStorage.getItem('auth_user')
-  
+
   if (token && user) {
     currentUser.value = JSON.parse(user)
     isAuthenticated.value = true
@@ -36,7 +36,7 @@ export async function register(username, password) {
   // Store token and user info
   localStorage.setItem('auth_token', data.token)
   localStorage.setItem('auth_user', JSON.stringify(data.user))
-  
+
   currentUser.value = data.user
   isAuthenticated.value = true
 
@@ -62,7 +62,7 @@ export async function login(username, password) {
   // Store token and user info
   localStorage.setItem('auth_token', data.token)
   localStorage.setItem('auth_user', JSON.stringify(data.user))
-  
+
   currentUser.value = data.user
   isAuthenticated.value = true
 
@@ -80,7 +80,7 @@ export function logout() {
 // Change password
 export async function changePassword(currentPassword, newPassword) {
   const token = localStorage.getItem('auth_token')
-  
+
   if (!token) {
     throw new Error('Not authenticated')
   }
@@ -106,7 +106,7 @@ export async function changePassword(currentPassword, newPassword) {
 // Get auth headers for authenticated requests
 export function getAuthHeaders() {
   const token = localStorage.getItem('auth_token')
-  
+
   if (!token) {
     return {}
   }
