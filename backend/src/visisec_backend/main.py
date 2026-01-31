@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import uuid
 import jwt
-from passlib.hash import bcrypt
+import bcrypt as bcrypt_lib
 
 # Load environment variables
 load_dotenv()
@@ -242,7 +242,7 @@ def register():
             return jsonify({"error": "Username already exists"}), 409
         
         # Hash password and create user
-        hashed_password = bcrypt.hash(password)
+        hashed_password = bcrypt_lib.hashpw(password.encode('utf-8'), bcrypt_lib.gensalt()).decode('utf-8')
         users_db[username] = {
             'username': username,
             'password': hashed_password,
@@ -293,7 +293,7 @@ def login():
         user = users_db[username]
         
         # Verify password
-        if not bcrypt.verify(password, user['password']):
+        if not bcrypt_lib.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
             logger.warning(f"❌ Invalid password for user: {username}")
             return jsonify({"error": "Invalid username or password"}), 401
         
@@ -362,12 +362,12 @@ def change_password():
         user = users_db[username]
         
         # Verify current password
-        if not bcrypt.verify(current_password, user['password']):
+        if not bcrypt_lib.checkpw(current_password.encode('utf-8'), user['password'].encode('utf-8')):
             logger.warning(f"❌ Invalid current password for user: {username}")
             return jsonify({"error": "Current password is incorrect"}), 401
         
         # Hash and update new password
-        hashed_password = bcrypt.hash(new_password)
+        hashed_password = bcrypt_lib.hashpw(new_password.encode('utf-8'), bcrypt_lib.gensalt()).decode('utf-8')
         users_db[username]['password'] = hashed_password
         
         logger.info(f"✅ Password changed successfully for user: {username}")
