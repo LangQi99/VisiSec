@@ -232,19 +232,19 @@
       "moments": {
         "1": {
           "title": "Course Opening: Core of Presentation",
-          "description": "Instructor introduced the core goal: mastering non-verbal skills. Key emphasis: 1. Body language accounts for 55%; 2. Tone and voice 38%; 3. Actual words only 7%. Your attention was highly focused, noting down the Mehrabian rule."
+          "description": "Instructor introduced the core goal: mastering non-verbal skills. Key emphasis: <b>1. Body language accounts for 55%</b>; <b>2. Tone and voice 38%</b>; 3. Actual words only 7%. Your attention was highly focused, noting down the Mehrabian rule."
         },
         "2": {
           "title": "Posture Deep Dive: Weight Distribution",
-          "description": "Instructor broke down the 'Redistribute Weight' stance into three key methods: 1. Grounding: Feet like tree roots; 2. Soft Knees: Flexible, not locked; 3. Centered Weight: Avoid leaning on one leg. System detected you noting 'Soft Knees', switching gaze between screen and notebook."
+          "description": "Instructor broke down the 'Redistribute Weight' stance into three key methods: <b>1. Grounding</b>: Feet like tree roots; <b>2. Soft Knees</b>: Flexible, not locked; <b>3. Centered Weight</b>: Avoid leaning on one leg. System detected you noting 'Soft Knees', switching gaze between screen and notebook."
         },
         "3": {
           "title": "Q&A: Colloquial Expressions",
-          "description": "Q&A on 'Colloquial Expressions'. Instructor listed conversion tips: 1. Short sentences over long ones; 2. Active voice over passive; 3. Use rhetorical questions. You checked your phone occasionally but noted 'Short sentences', maintaining overall follow-up."
+          "description": "System Multi-modal Detection: <b>Foreground app is QQ</b>, detecting typing behavior. While auditory attention captured 'short sentences' concepts, visual attention is diverted. Rated as Medium Attention."
         },
         "4": {
           "title": "IMPORTANT: Homework Assignment",
-          "description": "Instructor assigning core homework: 1. Textbook Page 42, Exercises 3-5 (Focus on Ex. 5); 2. Record a 3-minute speech video; 3. Peer review. !ALERT! System detected very low attention (phone usage), you likely missed the 'Video Recording' requirement. Please re-watch to confirm deadline."
+          "description": "!CRITICAL ALERT! <b>Multi-Agent Decision</b>: 1. Detected 'Honor of Kings' in foreground; 2. Gyroscope shows intense acceleration; 3. Facial analysis shows 'Happy/Excited'. <b>Conclusion: Complete distraction.</b> System automatically captured the homework slide (Page 42, Ex 3-5) for your review."
         }
       }
     }

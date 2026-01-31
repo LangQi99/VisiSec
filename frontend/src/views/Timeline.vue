@@ -128,10 +128,19 @@
               ]">
                 {{ t(`timeline.attention.${moment.attention}`) }}
               </span>
+              <div class="flex space-x-1">
+                <img 
+                  v-for="(icon, index) in moment.appIcons"
+                  :key="index"
+                  :src="icon" 
+                  alt="App" 
+                  class="w-6 h-6 rounded-full object-cover border border-gray-200"
+                />
+              </div>
             </div>
             
             <h4 class="font-serif font-bold text-ink mb-2">{{ moment.title }}</h4>
-            <p class="text-gray-600 text-sm mb-3">{{ moment.description }}</p>
+            <p class="text-gray-600 text-sm mb-3" v-html="moment.description"></p>
             
             <!-- Audio snippet -->
             <div class="flex items-center space-x-3">
@@ -180,7 +189,8 @@ const keyMoments = computed(() => [
     title: t('timeline.sample.moments.3.title'),
     description: t('timeline.sample.moments.3.description'),
     attention: 'medium',
-    image: '/mock/3.jpg'
+    image: '/mock/3.jpg',
+    appIcons: ['/mock/wechat.png', '/mock/douyin.png']
   },
   {
     time: 35,
@@ -188,7 +198,8 @@ const keyMoments = computed(() => [
     title: t('timeline.sample.moments.4.title'),
     description: t('timeline.sample.moments.4.description'),
     attention: 'low',
-    image: '/mock/4.jpg'
+    image: '/mock/4.jpg',
+    appIcons: ['/mock/wangzherongyao.png']
   }
 ])
 
@@ -198,3 +209,10 @@ const formatTime = (minutes) => {
   return `${mins}:${String(secs).padStart(2, '0')}`
 }
 </script>
+
+<style scoped>
+:deep(b) {
+  color: #000000;
+  font-weight: 800;
+}
+</style>
