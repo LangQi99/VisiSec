@@ -1,0 +1,99 @@
+{
+  "nav": {
+    "home": "Home",
+    "record": "Record Meeting",
+    "login": "Login",
+    "logout": "Logout",
+    "settings": "Settings",
+    "changePassword": "Change Password"
+  },
+  "home": {
+    "title": "VisiSec",
+    "subtitle": "Your Intelligent Meeting Assistant",
+    "description": "Through multimodal perception technology, capture and analyze, never miss any important moment",
+    "startRecording": "Start Recording",
+    "testConnection": "Test Connection",
+    "recentMeetings": "Recent Meetings",
+    "viewAll": "View All",
+    "features": {
+      "vision": {
+        "title": "Visual Capture",
+        "description": "Dual camera streams capture presentation content and your attention patterns"
+      },
+      "audio": {
+        "title": "Audio Recording",
+        "description": "High-fidelity audio capture with intelligent transcription and speaker detection"
+      },
+      "analysis": {
+        "title": "Intelligent Analysis",
+        "description": "AI-driven attention tracking and automatic action item extraction"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Welcome back",
+      "username": "Username",
+      "password": "Password",
+      "submit": "Login",
+      "noAccount": "Don't have an account?",
+      "register": "Register",
+      "usernamePlaceholder": "Enter your username",
+      "passwordPlaceholder": "Enter your password"
+    },
+    "register": {
+      "title": "Register",
+      "subtitle": "Create new account",
+      "username": "Username",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Register",
+      "hasAccount": "Already have an account?",
+      "login": "Login",
+      "usernamePlaceholder": "Enter your username",
+      "passwordPlaceholder": "Enter your password",
+      "confirmPasswordPlaceholder": "Re-enter your password"
+    },
+    "errors": {
+      "usernameRequired": "Please enter username",
+      "passwordRequired": "Please enter password",
+      "passwordMismatch": "Passwords do not match",
+      "loginFailed": "Login failed, please check your username and password",
+      "registerFailed": "Registration failed",
+      "usernameExists": "Username already exists",
+      "changePasswordFailed": "Password change failed"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageDescription": "Select interface language",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "currentPasswordPlaceholder": "Enter current password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmPasswordPlaceholder": "Re-enter new password",
+    "passwordChanged": "Password changed successfully",
+    "languageChanged": "Language switched"
+  },
+  "status": {
+    "processed": "Processed",
+    "processing": "Processing",
+    "pending": "Pending"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "success": "Success",
+    "error": "Error",
+    "loading": "Loading..."
+  }
+}
