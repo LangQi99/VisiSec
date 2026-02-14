@@ -23,6 +23,13 @@
 
 ---
 
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
+![alt text](image-5.png)
+![alt text](image-6.png)
 ## 📖 Overview
 
 **VisiSec** revolutionizes meeting documentation by combining **multimodal sensing** (audio + video + behavior) to create intelligent, context-aware meeting summaries. Say goodbye to information overload and hello to actionable insights.
